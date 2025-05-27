@@ -57,7 +57,7 @@ export default function LoginPage() {
         </CardContent>
 
         <CardFooter className="flex flex-col items-center mt-4 space-y-2">
-          <p className="text-sm text-gray-600">
+          {/* <p className="text-sm text-gray-600">
             Vous n'avez pas de compte ?{" "}
             <button
               onClick={() => navigate("/register")}
@@ -65,7 +65,7 @@ export default function LoginPage() {
             >
               Inscrivez-vous
             </button>
-          </p>
+          </p> */}
           <button
             onClick={() => navigate("/forgot-password")}
             className="text-sm text-[#F8A67E] hover:underline"

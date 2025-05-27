@@ -8,11 +8,16 @@ export default function DashboardLayout() {
   return (
     <SidebarProvider>
       <div className="flex h-screen overflow-hidden">
+        {/* Sidebar - visible en md+ / hidden en mobile mais gérable via SidebarTrigger */}
         <AppSidebar className="hidden md:block w-64 shrink-0" />
+
+        {/* Contenu principal */}
         <div className="flex flex-col flex-1 overflow-hidden">
           <SiteHeader />
-          <main className="flex-1 overflow-y-auto pt-14 px-4">
-            <Outlet />
+
+          {/* Outlet = contenu de la page actuelle */}
+          <main className="flex-1 overflow-y-auto px-4 pt-14 md:px-6  ">
+            <Outlet/>
           </main>
         </div>
       </div>

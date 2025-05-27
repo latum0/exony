@@ -19,9 +19,12 @@ import {
   UsersIcon,
   FactoryIcon,
   ShoppingCartIcon,
-  UserXIcon
+  UserXIcon,
+  PackageIcon,
+ UserIcon
 } from "lucide-react";
 
+import useProfile from "@/hooks/useProfile";
 import { NavDocuments } from "@/components/layout/nav-documents";
 import { NavMain } from "@/components/layout/nav-main";
 import { NavSecondary } from "@/components/layout/nav-secondary";
@@ -35,19 +38,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Avatar } from "../ui/avatar";
+import { AvatarFallback } from "../ui/avatar";
 
 const data = {
-  user: {
-    name: "name",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
+//   user: {
+//     name: "name",
+//     email: "m@example.com",
+//     avatar: "/avatars/shadcn.jpg",
+//   },
 navMain: [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboardIcon },
   { title: "Fournisseurs", url: "/fournisseurs", icon: FactoryIcon },
   { title: "Utilisateurs", url: "/utilisateurs", icon: UsersIcon },
   { title: "Commandes", url: "/commandes", icon: ShoppingCartIcon },
+    { title: "Clients", url: "/client", icon: UserIcon },  
   { title: "Liste noire", url: "/liste-noire", icon: UserXIcon },
+     { title: "Produits", url: "/produits", icon: PackageIcon },  
 ],
 
   navClouds: [
@@ -135,6 +142,16 @@ navMain: [
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+                const { profile } = useProfile(); 
+
+
+ const user = {
+  name: profile?.name || "Utilisateur",
+ email: profile?.role || "Email inconnu",
+//   avatar: "/avatars/shadcn.jpg",
+};
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -158,13 +175,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="mt-4">
         <NavMain items={data.navMain} />
         {/* <NavDocuments items={data.documents} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+
+        <NavUser user={user} />
+        
       </SidebarFooter>
     </Sidebar>
   );

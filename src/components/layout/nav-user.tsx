@@ -7,7 +7,7 @@ import {
   MoreVerticalIcon,
   UserCircleIcon,
 } from "lucide-react"
-
+import { Link } from "react-router-dom"
 import {
   Avatar,
   AvatarFallback,
@@ -28,6 +28,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { AccountModal } from "./account"
+import { useState } from "react"
 
 export function NavUser({
   user,
@@ -39,6 +41,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+const [open, setOpen] = useState(false)
 
   return (
     <SidebarMenu>
@@ -51,7 +54,12 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                
+        {/* Si jamais un jour tu ajoutes AvatarImage, il s'affichera ici */}
+        <AvatarFallback className="bg-[#F8A67E] text-white font-bold uppercase">
+          {user.name.charAt(0)}
+        </AvatarFallback>
+     
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -72,7 +80,12 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                 
+        {/* Si jamais un jour tu ajoutes AvatarImage, il s'affichera ici */}
+        <AvatarFallback className="bg-[#F8A67E] text-white font-bold uppercase">
+          {user.name.charAt(0)}
+        </AvatarFallback>
+    
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -84,14 +97,11 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircleIcon />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon />
-                Billing
-              </DropdownMenuItem>
+             <DropdownMenuItem onClick={() => setOpen(true)}>
+  <UserCircleIcon className="size-4" />
+  Mon compte
+</DropdownMenuItem>
+             
               <DropdownMenuItem>
                 <BellIcon />
                 Notifications
@@ -105,6 +115,8 @@ export function NavUser({
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+      <AccountModal open={open} onClose={() => setOpen(false)} user={user} />
     </SidebarMenu>
+    
   )
 }
