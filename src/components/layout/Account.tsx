@@ -62,10 +62,16 @@ export function AccountModal({
           <p className="text-destructive text-sm">Erreur de chargement</p>
         ) : (
           <Tabs value={tab} onValueChange={setTab} className="w-full space-y-4">
-                
+                {profile?.name && (
+  <div className="flex justify-center mb-4">
+    <div className="w-16 h-16 rounded-full bg-[#F8A67E] text-white flex items-center justify-center text-2xl font-bold shadow-md">
+      {profile.name.charAt(0).toUpperCase()}
+    </div>
+  </div>
+)}
             <TabsList className="grid w-full grid-cols-2" >
-              <TabsTrigger value="view"  style={{background:"#F8A67E"}}>Mon compte</TabsTrigger>
-              <TabsTrigger value="edit"  style={{background:"#F8A67E"}}>Modifier</TabsTrigger>
+              <TabsTrigger value="view"  style={{background:"#F1c69E"}}>Mon compte</TabsTrigger>
+              <TabsTrigger value="edit"  style={{background:"#F6C69F"}}>Modifier</TabsTrigger>
             </TabsList>
 
             {/* Tab: Affichage du profil */}

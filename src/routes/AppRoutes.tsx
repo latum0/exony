@@ -11,7 +11,7 @@ import ListeNoirePage from "@/features/ListeNoire/ListeNoirePage";
 import PrivateRoute from "@/components/PrivateRoute";
 import Clients from "@/features/Clients/client";
 import Produits from "@/features/Produits/produits";
-
+import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
 export function AppRoutes() {
   return (
     <Routes>
@@ -19,10 +19,11 @@ export function AppRoutes() {
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
+ <Route path="/reset-password" element={<ResetPasswordPage />} />
       {/* Routes privées */}
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<DashboardLayout />}>
+       
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="fournisseurs" element={<FournisseursPage />} />
           <Route path="utilisateurs" element={<UtilisateursPage />} />

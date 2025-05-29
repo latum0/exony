@@ -7,6 +7,7 @@ export function useForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [success, setSuccess] = useState(false); // nouveau
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,8 +15,7 @@ export function useForgotPassword() {
 
     try {
       await api.post("/auth/forgot-password", { email });
-      alert("Un email de réinitialisation a été envoyé.");
-      navigate("/login");
+        setSuccess(true);
     } catch (error: any) {
       if (error.response?.status === 404) {
         alert("Utilisateur non trouvé.");
@@ -32,5 +32,6 @@ export function useForgotPassword() {
     setEmail,
     loading,
     handleSubmit,
+     success,
   };
 }
