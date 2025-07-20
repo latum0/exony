@@ -15,21 +15,19 @@ import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
 export function AppRoutes() {
   return (
     <Routes>
-      {/* Routes publiques */}
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
- <Route path="/reset-password" element={<ResetPasswordPage />} />
-      {/* Routes privées */}
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<DashboardLayout />}>
-       
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="fournisseurs" element={<FournisseursPage />} />
           <Route path="utilisateurs" element={<UtilisateursPage />} />
           <Route path="commandes" element={<CommandesPage />} />
           <Route path="liste-noire" element={<ListeNoirePage />} />
-           <Route path="client" element={<Clients />} />
+          <Route path="client" element={<Clients />} />
           <Route path="Produits" element={<Produits />} />
         </Route>
       </Route>

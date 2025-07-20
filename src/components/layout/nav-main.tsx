@@ -1,45 +1,45 @@
-"use client"
+"use client";
 
-import { type LucideIcon } from "lucide-react"
+import { type LucideIcon } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { useEffect, useState } from "react"
+} from "@/components/ui/sidebar";
+import { useEffect, useState } from "react";
 
 export function NavMain({
   items,
 }: {
   items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-  }[]
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+  }[];
 }) {
-  const [activePath, setActivePath] = useState("")
+  const [activePath, setActivePath] = useState("");
 
   useEffect(() => {
-    setActivePath(window.location.pathname)
-  }, [])
+    setActivePath(window.location.pathname);
+  }, []);
 
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-3 px-1 py-2">
         <SidebarMenu className="space-y-1">
           {items.map((item) => {
-            const isActive = activePath === item.url
+            const isActive = activePath === item.url;
 
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  className={`group flex items-center gap-3 w-full rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ${
+                  className={`group flex items-center gap-3 w-full rounded-md px-3 py-3 h-9 text-sm font-medium transition-colors duration-300 ${
                     isActive
-                      ? "bg-[#fbe7e1] text-[#F8A67E] shadow-inner"
-                      : "text-muted-foreground hover:bg-[#ffe0d6] hover:text-[#F8A67E]"
+                      ? "bg-[#fce5d9] text-[#F8A67E] shadow-inner"
+                      : "text-muted-foreground hover:bg-neutral-200/50 "
                   }`}
                 >
                   <a href={item.url} onClick={() => setActivePath(item.url)}>
@@ -50,14 +50,20 @@ export function NavMain({
                         }`}
                       />
                     )}
-                    <span className="truncate">{item.title}</span>
+                    <span
+                      className={`trancate ${
+                        isActive ? "text-[#F8A67E]" : "text-muted-foreground"
+                      }`}
+                    >
+                      {item.title}
+                    </span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            )
+            );
           })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
+  );
 }

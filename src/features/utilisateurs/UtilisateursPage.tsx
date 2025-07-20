@@ -6,7 +6,7 @@ import { PlusIcon } from "lucide-react";
 import { UserTable } from "./components/UserTable";
 import UserFormDialog from "./components/UserFormDialog";
 
-import { deleteUser, fetchUsers } from "@/hooks/usersHooks";
+import { fetchUsers } from "@/hooks/usersHooks";
 export const UsersPage = () => {
   const dispatch = useAppDispatch();
   const { users, loading } = useAppSelector((state) => state.users);

@@ -1,6 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -8,10 +8,10 @@
 @tailwind components;
 @tailwind utilities;
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Poppins", sans-serif;
   line-height: 1.5;
   font-weight: 400;
-width: 100%;
+  width: 100%;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #ffffff;
@@ -69,7 +69,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-    font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 h1 {
@@ -78,24 +78,8 @@ h1 {
 }
 
 button {
-  border-radius: 16px;
-  
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #f8a77e23;
   cursor: pointer;
   transition: border-color 0.2s;
-  
-}
-button:hover {
-  border-color: #2e2e11;
-    border: 1px solid #f8a77e;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
 @media (prefers-color-scheme: light) {
@@ -191,7 +175,6 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
-
 
 /* @keyframes floating {
   0%, 100% {
