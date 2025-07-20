@@ -1,3 +1,4 @@
+// src/hooks/useLogin.ts
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setTokens } from "@/store/slices/authSlice";
@@ -9,8 +10,6 @@ export default function useLogin() {
 
   const login = async (formData: { email: string; password: string }) => {
     try {
-      console.log("Data envoyée :", formData);
-
       const response = await api.post("/auth/login", {
         email: formData.email,
         password: formData.password,
@@ -18,18 +17,28 @@ export default function useLogin() {
 
       const { accessToken, refreshToken, user } = response.data;
 
-      // ✅ Sauvegarde des tokens dans localStorage
+      // Stockage dans localStorage
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
-      // ✅ Sauvegarde des tokens dans Redux
-      dispatch(setTokens({ accessToken, refreshToken }));
+      // Mise à jour du state Redux AVANT la navigation
+      dispatch(setTokens({ 
+        accessToken, 
+        refreshToken,
+        user 
+      }));
 
-      // ✅ Redirection après connexion
+      // Navigation après la mise à jour du state
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Login failed", error.response?.data || error.message);
-      throw new Error("Échec de la connexion. Vérifiez vos identifiants.");
+      
+      let errorMessage = "Échec de la connexion. Vérifiez vos identifiants.";
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      throw new Error(errorMessage);
     }
   };
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { CogIcon, PlusCircleIcon, PlusIcon } from "lucide-react";
 import { UserTable } from "./components/UserTable";
 import UserFormDialog from "./components/UserFormDialog";
 
@@ -18,15 +18,15 @@ export const UsersPage = () => {
   return (
     <div className="p-6 ">
       <div className="flex justify-between items-center mb-4 ">
-        <h2 className="text-2xl font-bold text-gray-800">
-          Gestion des utilisateurs
+         <h2 className="text-2xl font-bold gap-x-2  flex items-center text-[#F8A67E]">
+          <CogIcon size={28} /> Gestion des utilisateurs
         </h2>
         <Button
           onClick={() => setDialogOpen(true)}
-          style={{ background: "#F8A67E" }}
+            style={{ background: "#F8A67E", borderRadius: "8px" }}
         >
-          <PlusIcon className="w-4 h-4 mr-2" />
-          Ajouter un utilisateur
+          <PlusCircleIcon className="w-4 h-4 mr-[3px]" />
+          Ajouter
         </Button>
 
         <UserFormDialog

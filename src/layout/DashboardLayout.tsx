@@ -7,7 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 export default function DashboardLayout() {
   return (
     <SidebarProvider>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen w-screen overflow-hidden">
         {/* Sidebar - visible en md+ / hidden en mobile mais gérable via SidebarTrigger */}
         <AppSidebar className="hidden md:block w-64 shrink-0" />
 
