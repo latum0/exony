@@ -7,6 +7,7 @@ import {
   Edit,
   MoreHorizontal,
   Trash2Icon,
+  Ban,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,28 +19,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner"; // Import toast from sonner
+
 export interface Client {
-  id: number;
+  idClient: number;
   nom: string;
   prenom: string;
   adresse: string;
   email: string;
   numeroTelephone: string;
-  //   commentaires?: {
-  //     contenu: string;
-  //     date?: string;
-  //   }[];
   statut: "ACTIVE" | "BLACKLISTED";
 }
 
 interface ClientColumnsProps {
   onEdit: (client: Client) => void;
   onDelete: (id: number) => void;
+  onBlacklist: (id: number) => void;
 }
 
 export const getClientColumns = ({
   onEdit,
   onDelete,
+  onBlacklist,
 }: ClientColumnsProps): ColumnDef<Client>[] => {
   return [
     {
@@ -115,7 +116,6 @@ export const getClientColumns = ({
       enableHiding: false,
       cell: ({ row }) => {
         const client = row.original;
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -132,25 +132,67 @@ export const getClientColumns = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-blue-600 hover:text-blue-600/90 cursor-pointer"
-                onClick={() => navigator.clipboard.writeText(client.email)}
+                onClick={() => {
+                  navigator.clipboard.writeText(client.email);
+                  toast.success("Email copié !", {
+                    description: client.email,
+                    duration: 2000,
+                  });
+                }}
               >
-                <Copy size={9} className="text-blue-600" />
-                Copier l'email
+                <Copy
+                  size={14}
+                  className="mr-2 text-blue-600 hover:text-blue-600/90 "
+                />
+                <span className=" text-blue-600 hover:text-blue-600/90 ">
+                  {" "}
+                  Copier l'email
+                </span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => onEdit(client)}
                 className="text-green-600 hover:text-green-600/90 cursor-pointer"
               >
-                <Edit size={9} className="text-green-600" />
-                Modifier
+                <Edit
+                  size={14}
+                  className="mr-2 text-green-600 hover:text-green-600/90"
+                />
+                <span className=" text-green-600 hover:text-green-600/90 ">
+                  {" "}
+                  Modifier
+                </span>
               </DropdownMenuItem>
+              {client.statut === "ACTIVE" && (
+                <DropdownMenuItem
+                  onClick={() => onBlacklist(client.idClient)}
+                  className="text-orange-600 hover:text-orange-600/90 cursor-pointer"
+                >
+                  <Ban
+                    size={14}
+                    className="mr-2 text-orange-600 hover:text-orange-600/90 "
+                  />
+
+                  <span className=" text-orange-600 hover:text-orange-600/90 ">
+                    {" "}
+                    Ajouter au blacklist
+                  </span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
-                onClick={() => client.id && onDelete(client.id)}
+                onClick={() => {
+                  onDelete(client.idClient);
+                }}
                 className="text-red-600 hover:text-red-600/90 cursor-pointer"
               >
-                <Trash2Icon size={9} className="text-red-600" />
-                Supprimer
+                <Trash2Icon
+                  size={14}
+                  className="mr-2 text-red-600 hover:text-red-600/90"
+                />
+                <span className=" text-red-600 hover:text-red-600/90 ">
+                  {" "}
+                  Supprimer
+                </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

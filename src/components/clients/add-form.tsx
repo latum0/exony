@@ -24,8 +24,9 @@ import { Edit2Icon, Plus, PlusCircle, X } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient, fetchClients, updateClient } from "@/hooks/clients-hook";
+import { createClient, updateClient } from "@/hooks/clients-hook";
 import { useAppDispatch } from "@/hooks/redux-hooks";
+import { toast } from "sonner";
 
 export const ClientStatut = z.enum(["ACTIVE", "BLACKLISTED"]);
 
@@ -53,7 +54,7 @@ const clientSchema = z.object({
 type FormValues = z.infer<typeof clientSchema>;
 
 type User = {
-  id?: number;
+  idClient?: number;
   nom: string;
   prenom: string;
   adresse: string;
@@ -69,7 +70,9 @@ type Props = {
   open: boolean;
   onClose: () => void;
   initialData?: User | null;
+  onSuccess?: () => void;
 };
+
 export interface ClientFormValues {
   nom: string;
   prenom: string;
@@ -82,7 +85,7 @@ export interface ClientFormValues {
   statut: "ACTIVE" | "BLACKLISTED";
 }
 
-const UserFormDialog = ({ open, onClose, initialData }: Props) => {
+const UserFormDialog = ({ open, onClose, initialData, onSuccess }: Props) => {
   const dispatch = useAppDispatch();
 
   const {
@@ -120,10 +123,21 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
         email: initialData.email,
         numeroTelephone: initialData.numeroTelephone,
         statut: initialData.statut,
-        commentaires: initialData.commentaires || [{ contenu: "" }],
+        commentaires:
+          initialData.commentaires && initialData.commentaires.length > 0
+            ? initialData.commentaires
+            : [{ contenu: "" }],
       });
     } else {
-      reset();
+      reset({
+        nom: "",
+        prenom: "",
+        email: "",
+        numeroTelephone: "",
+        adresse: "",
+        commentaires: [{ contenu: "" }],
+        statut: "ACTIVE",
+      });
     }
   }, [initialData, reset]);
 
@@ -139,20 +153,36 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
     };
 
     try {
-      if (initialData?.id) {
+      if (initialData?.idClient) {
         await dispatch(
-          updateClient({ id: initialData.id, data: payload })
+          updateClient({ id: initialData.idClient, data: payload })
         ).unwrap();
-        // toast.success("Client updated successfully");
+        toast.success("Client modifié avec succès !", {
+          description: `Le client ${payload.nom} ${payload.prenom} a été mis à jour.`,
+        });
       } else {
         await dispatch(createClient(payload)).unwrap();
-        await dispatch(fetchClients());
-        // toast.success("Client created successfully");
+        toast.success("Client créé avec succès !", {
+          description: `Le client ${payload.nom} ${payload.prenom} a été ajouté.`,
+        });
       }
       onClose();
+      onSuccess?.();
     } catch (err) {
-      console.error("Error during client submission:", err);
-      // toast.error("Erreur lors de la soumission du client");
+      const errorMessage =
+        err?.data?.message ||
+        err?.message ||
+        "Une erreur inconnue est survenue.";
+
+      if (err?.status === 409) {
+        toast.error("Erreur de conflit", {
+          description: errorMessage,
+        });
+      } else {
+        toast.error("Erreur lors de la soumission du client", {
+          description: errorMessage,
+        });
+      }
     }
   };
 
@@ -162,15 +192,12 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
         <DialogHeader>
           <DialogTitle className="text-center w-full">
             {initialData ? (
-              <span className="flex items-center">
-                <Edit2Icon className="inline-block mr-1.5" /> Ajouter Modifier
-                le client
+              <span className="flex items-center justify-center">
+                <Edit2Icon className="inline-block mr-1.5" /> Modifier le client
               </span>
             ) : (
-              <span className="flex items-center">
-                {" "}
-                <PlusCircle className="inline-block  mr-1.5" /> Ajouter un
-                client
+              <span className="flex items-center justify-center">
+                <PlusCircle className="inline-block mr-1.5" /> Ajouter un client
               </span>
             )}
           </DialogTitle>
@@ -208,7 +235,7 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
                 id="adresse"
                 {...register("adresse")}
                 placeholder="123 Rue Exemple, Alger"
-                className="focus-visible:ring-orange-300  h-10"
+                className="focus-visible:ring-orange-300 h-10"
               />
               {errors.adresse && (
                 <p className="text-sm text-red-500">{errors.adresse.message}</p>
@@ -221,7 +248,7 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
                 type="email"
                 {...register("email")}
                 placeholder="jean.dupont@example.com"
-                className="focus-visible:ring-orange-300  h-10"
+                className="focus-visible:ring-orange-300 h-10"
               />
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -233,7 +260,7 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
                 id="numeroTelephone"
                 {...register("numeroTelephone")}
                 placeholder="+213612345678"
-                className="focus-visible:ring-orange-300  h-10"
+                className="focus-visible:ring-orange-300 h-10"
               />
               {errors.numeroTelephone && (
                 <p className="text-sm text-red-500">
@@ -242,7 +269,6 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
               )}
             </div>
           </div>
-
           {initialData && (
             <div className="space-y-2">
               <Label htmlFor="statut">Statut</Label>
@@ -265,10 +291,8 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
               )}
             </div>
           )}
-
           <div className="space-y-2">
             <div className="w-full flex justify-between items-center">
-              {" "}
               <Label>Commentaires</Label>
               <Button
                 type="button"
@@ -280,7 +304,6 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
                 Ajouter un commentaire
               </Button>
             </div>
-
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-2">
                 <Textarea
@@ -300,14 +323,12 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
                 </Button>
               </div>
             ))}
-
             {errors.commentaires && (
               <p className="text-sm text-red-500">
                 {errors.commentaires?.message}
               </p>
             )}
           </div>
-
           <DialogFooter className="pt-4">
             <Button
               type="button"

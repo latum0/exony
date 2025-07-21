@@ -3,7 +3,7 @@ import { API_BASE_URL } from "@/constants/config";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 // Ajoute automatiquement le token à chaque requête
@@ -27,9 +27,13 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
-          withCredentials: true,
-        });
+        const refreshResponse = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {},
+          {
+            withCredentials: true,
+          }
+        );
 
         const newAccessToken = refreshResponse.data.accessToken;
 

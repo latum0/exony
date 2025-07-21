@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createClient, updateClient, fetchClients } from "@/hooks/clients-hook";
+import {
+  createClient,
+  updateClient,
+  fetchClients,
+  addToBlacklist,
+} from "@/hooks/clients-hook";
 import type { Client } from "@/components/clients/columns";
 
 interface ClientState {
@@ -55,7 +60,7 @@ const clientsSlice = createSlice({
     });
     builder.addCase(updateClient.fulfilled, (state, action) => {
       const index = state.clients.findIndex(
-        (client) => client.id === action.payload.id
+        (client) => client.idClient === action.payload.id
       );
       if (index !== -1) {
         state.clients[index] = action.payload;
@@ -65,6 +70,25 @@ const clientsSlice = createSlice({
     builder.addCase(updateClient.rejected, (state, action) => {
       state.loading = false;
       state.error = action.error.message || "Failed to update client.";
+    });
+    // Add To Blacklist
+    builder.addCase(addToBlacklist.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(addToBlacklist.fulfilled, (state, action) => {
+      const index = state.clients.findIndex(
+        (client) => client.idClient === action.payload.idClient
+      );
+      if (index !== -1) {
+        state.clients[index] = action.payload;
+      }
+      state.loading = false;
+    });
+    builder.addCase(addToBlacklist.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.message || "Failed to add client to blacklist.";
     });
   },
 });

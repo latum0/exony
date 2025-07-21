@@ -12,23 +12,31 @@ export const createClient = createAsyncThunk(
   async (client: ClientFormValues, { rejectWithValue }) => {
     try {
       const response = await api.post("/clients", client);
-      return response.data;
-    } catch (err: any) {
-      const status = err?.response?.status;
-      const serverMsg = err?.response?.data?.message;
 
-      if (status === 409) {
-        if (serverMsg.includes("Client_email_key")) {
-          return rejectWithValue("Un client avec cet email existe déjà.");
-        }
-        if (serverMsg.includes("Client_numeroTelephone_key")) {
-          return rejectWithValue(
-            "Un client avec ce numéro de téléphone existe déjà."
-          );
-        }
+      const serverMsg = response.data?.message;
+
+      let userMessage: string | null = null;
+
+      if (serverMsg?.includes("Client_email_key")) {
+        userMessage = "Un client avec cet email existe déjà.";
+      } else if (serverMsg?.includes("Client_numeroTelephone_key")) {
+        userMessage = "Un client avec ce numéro de téléphone existe déjà.";
       }
 
-      return rejectWithValue("Une erreur inconnue est survenue.");
+      if (userMessage) {
+        return rejectWithValue({
+          status: 409,
+          message: userMessage,
+        });
+      }
+
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue({
+        status: err?.response?.status ?? 500,
+        message:
+          err?.response?.data?.message ?? "Une erreur inconnue est survenue.",
+      });
     }
   }
 );
@@ -36,7 +44,8 @@ export const createClient = createAsyncThunk(
 export const updateClient = createAsyncThunk(
   "clients/update",
   async ({ id, data }: UpdateClientPayload) => {
-    const response = await api.put(`/clients/${id}`, data);
+    const response = await api.patch(`/clients/${id}`, data);
+
     return response.data;
   }
 );
@@ -45,3 +54,18 @@ export const fetchClients = createAsyncThunk("clients/fetchAll", async () => {
 
   return response.data.data;
 });
+export const deleteClient = createAsyncThunk(
+  "clients/delete",
+  async (id: number) => {
+    const response = await api.delete(`/clients/${id}`);
+
+    return response.data;
+  }
+);
+export const addToBlacklist = createAsyncThunk(
+  "clients/addToBlacklist",
+  async (clientId: number) => {
+    const response = await api.patch(`/clients/addBlacklist/${clientId}`);
+    return response.data;
+  }
+);
