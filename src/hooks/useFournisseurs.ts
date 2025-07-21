@@ -58,29 +58,29 @@ export const useFournisseurs = (): UseFournisseursReturn => {
     return undefined;
   };
 
-  const getFournisseurs = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get<Fournisseur[]>('/fournisseurs');
-      setFournisseurs(response.data);
-      setLoading(false);
-    } catch (error) {
-      handleApiError(error);
-    }
-  };
+ const getFournisseurs = async () => {
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.get<{ data: Fournisseur[] }>('/fournisseurs');
+    setFournisseurs(response.data.data); 
+    setLoading(false);
+  } catch (error) {
+    handleApiError(error);
+  }
+};
 
-  const getFournisseur = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get<Fournisseur>(`/fournisseurs/${id}`);
-      setFournisseur(response.data);
-      setLoading(false);
-    } catch (error) {
-      handleApiError(error);
-    }
-  };
+ const getFournisseur = async (id: string) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.get<Fournisseur>(`/fournisseurs/${id}`);
+    setFournisseur(response.data); 
+    setLoading(false);
+  } catch (error) {
+    handleApiError(error);
+  }
+};
 
   const createFournisseur = async (data: FournisseurInput) => {
     setLoading(true);
@@ -148,18 +148,19 @@ export const useFournisseurs = (): UseFournisseursReturn => {
   };
 };
 
-export interface Fournisseur {
-  id: string;
+interface Fournisseur {
+  idFournisseur: number;  
   nom: string;
   adresse: string;
   contact: string;
   telephone: string;
   email: string;
+ 
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface FournisseurInput {
+interface FournisseurInput {
   nom: string;
   adresse: string;
   contact: string;
