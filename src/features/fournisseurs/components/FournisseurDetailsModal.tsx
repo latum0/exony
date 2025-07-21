@@ -22,7 +22,11 @@ export const FournisseurDetailsModal: React.FC<FournisseurDetailsModalProps> = (
         <DialogHeader>
           <DialogTitle>Détails du fournisseur</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+         <div className="space-y-4">
+          <div>
+            <h3 className="font-medium">ID:</h3>
+            <p>{fournisseur.idFournisseur}</p>
+          </div>
           <div>
             <h3 className="font-medium">Nom:</h3>
             <p>{fournisseur.nom}</p>

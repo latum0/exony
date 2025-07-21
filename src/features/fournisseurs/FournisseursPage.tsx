@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircleIcon, CogIcon, PencilIcon, TrashIcon, Eye } from "lucide-react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
@@ -25,7 +25,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const FournisseursPage = () => {
   const {
-    fournisseurs,
+    fournisseurs = [],
     fournisseur,
     loading,
     error,
@@ -48,38 +48,54 @@ export const FournisseursPage = () => {
     pageSize: 5,
   });
 
-  const filteredFournisseurs = fournisseurs.filter(f =>
-    f.nom.toLowerCase().includes(globalFilter.toLowerCase()) ||
-    f.contact.toLowerCase().includes(globalFilter.toLowerCase()) ||
-    f.email.toLowerCase().includes(globalFilter.toLowerCase()) ||
-    f.telephone.includes(globalFilter)
-  );
+const filteredFournisseurs = Array.isArray(fournisseurs) 
+  ? fournisseurs.filter(f =>
+      f.nom?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+      f.contact?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+      f.email?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+      f.telephone?.includes(globalFilter)
+    )
+  : [];
 
   const pageCount = Math.ceil(filteredFournisseurs.length / pagination.pageSize);
   const paginatedFournisseurs = filteredFournisseurs.slice(
     pagination.pageIndex * pagination.pageSize,
     (pagination.pageIndex + 1) * pagination.pageSize
   );
+  const handleGetFournisseurs = async () => {
+  try {
+    await getFournisseurs();
+  } catch (error) {
+    setDataError(true);
+  }
+};
 
+  useEffect(() => {
+  handleGetFournisseurs();
+}, []);
   const handleCreateFournisseur = async (data: FournisseurInput) => {
     await createFournisseur(data);
     setDialogOpen(false);
     getFournisseurs();
   };
 
-  const handleUpdateFournisseur = async (data: FournisseurInput) => {
-    if (selectedFournisseur) {
-      await updateFournisseur(selectedFournisseur.id, data);
-      setDialogOpen(false);
-      setSelectedFournisseur(null);
-      getFournisseurs();
-    }
-  };
+const handleUpdateFournisseur = async (data: FournisseurInput) => {
+  if (selectedFournisseur) {
+    await updateFournisseur(selectedFournisseur.idFournisseur.toString(), data);
+    setDialogOpen(false);
+    setSelectedFournisseur(null);
+    getFournisseurs();
+  }
+};
 
-  const handleViewDetails = async (id: string) => {
-    await getFournisseur(id);
+const handleViewDetails = async (idFournisseur: number) => {  // Changé de string à number
+  try {
+    await getFournisseur(idFournisseur.toString()); // Convertir en string pour l'URL
     setViewDialogOpen(true);
-  };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des détails:", error);
+  }
+};
 
   const handleDeleteClick = (fournisseur: Fournisseur) => {
     setFournisseurToDelete(fournisseur);
@@ -95,11 +111,17 @@ export const FournisseursPage = () => {
     }
   };
 
-  const handleEdit = (fournisseur: Fournisseur) => {
-    setSelectedFournisseur(fournisseur);
-    setDialogOpen(true);
-  };
-
+ const handleEdit = (fournisseur: Fournisseur) => {
+  setSelectedFournisseur({
+    idFournisseur: fournisseur.idFournisseur,
+    nom: fournisseur.nom,
+    adresse: fournisseur.adresse,
+    contact: fournisseur.contact,
+    telephone: fournisseur.telephone,
+    email: fournisseur.email
+  });
+  setDialogOpen(true);
+};
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
@@ -141,7 +163,7 @@ export const FournisseursPage = () => {
           <div className="overflow-x-auto">
             <Table className="min-w-full">
               <TableHeader className="bg-gray-100">
-                <TableRow>
+                <TableRow >
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
                     Nom
                   </TableHead>
@@ -207,14 +229,14 @@ export const FournisseursPage = () => {
                           >
                             <PencilIcon className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
-                            onClick={() => handleViewDetails(f.id)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                         <Button
+  variant="outline"
+  size="sm"
+  className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
+  onClick={() => handleViewDetails(f.idFournisseur)}  
+>
+  <Eye className="h-4 w-4" />
+</Button>
                           <Button
                             variant="outline"
                             size="sm"
