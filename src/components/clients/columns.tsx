@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner"; // Import toast from sonner
+import { toast } from "sonner";
 
 export interface Client {
   idClient: number;

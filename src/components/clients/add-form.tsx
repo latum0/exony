@@ -192,11 +192,11 @@ const UserFormDialog = ({ open, onClose, initialData, onSuccess }: Props) => {
         <DialogHeader>
           <DialogTitle className="text-center w-full">
             {initialData ? (
-              <span className="flex items-center justify-center">
+              <span className="flex items-center ">
                 <Edit2Icon className="inline-block mr-1.5" /> Modifier le client
               </span>
             ) : (
-              <span className="flex items-center justify-center">
+              <span className="flex items-center j">
                 <PlusCircle className="inline-block mr-1.5" /> Ajouter un client
               </span>
             )}
