@@ -14,6 +14,7 @@ import Produits from "@/features/Produits/produits";
 import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
 import AjouterProduitPage from "@/features/Produits/ajouter/page";
 import ProduitDetailPage from "@/features/Produits/[id]/detailsPage";
+import ModifierProduitPage from "@/features/Produits/[id]/modifier/editPage";
 export function AppRoutes() {
   return (
     <Routes>
@@ -33,6 +34,10 @@ export function AppRoutes() {
           <Route path="produits" element={<Produits />} />
           <Route path="/produits/ajouter" element={<AjouterProduitPage />} />
           <Route path="/produits/:id" element={<ProduitDetailPage />} />
+          <Route
+            path="/produits/:id/modifier"
+            element={<ModifierProduitPage />}
+          />
         </Route>
       </Route>
     </Routes>

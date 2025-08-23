@@ -13,9 +13,17 @@ export interface ProduitFormValues {
   fournisseurs: number[];
 }
 
-interface UpdateProduitPayload {
-  id: string;
-  data: FormData;
+export interface EditProduitFormValues {
+  nom: string;
+  description: string;
+  prix: number;
+  stock: number;
+  remise: number;
+  marque: string;
+  categorie: string;
+  images: File[];
+  keepImages: string[];
+  fournisseurs: number[];
 }
 
 export const createProduit = createAsyncThunk(
@@ -60,13 +68,47 @@ export const createProduit = createAsyncThunk(
 
 export const updateProduit = createAsyncThunk(
   "produits/update",
-  async ({ id, data }: UpdateProduitPayload) => {
-    const response = await api.patch(`/produits/${id}`, data, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
+  async (
+    { id, data }: { id: string; data: EditProduitFormValues },
+    { rejectWithValue }
+  ) => {
+    try {
+      const formData = new FormData();
+
+      // Add text fields
+      formData.append("nom", data.nom);
+      formData.append("description", data.description);
+      formData.append("prix", data.prix.toString());
+      formData.append("stock", data.stock.toString());
+      formData.append("remise", data.remise.toString());
+      formData.append("marque", data.marque);
+      formData.append("categorie", data.categorie);
+
+      // Add new images
+      data.images.forEach((image) => {
+        formData.append(`images`, image);
+      });
+
+      // Add kept images as JSON array
+      formData.append("keepImages", JSON.stringify(data.keepImages));
+
+      // Add suppliers as JSON array
+      formData.append("fournisseurs", JSON.stringify(data.fournisseurs));
+
+      const response = await api.put(`/produits/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response);
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue({
+        status: err?.response?.status ?? 500,
+        message:
+          err?.response?.data?.message ?? "Une erreur inconnue est survenue.",
+      });
+    }
   }
 );
 
@@ -90,6 +132,7 @@ export const fetchProduits = createAsyncThunk(
     return response.data;
   }
 );
+
 export const fetchProduit = createAsyncThunk(
   "produits/fetchOne",
   async (id: string) => {
@@ -98,6 +141,7 @@ export const fetchProduit = createAsyncThunk(
     return response.data;
   }
 );
+
 export const fetchFournisseurs = createAsyncThunk(
   "fournisseurs/fetchAll",
   async () => {
