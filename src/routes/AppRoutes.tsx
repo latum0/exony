@@ -12,8 +12,13 @@ import PrivateRoute from "@/components/PrivateRoute";
 import Clients from "@/features/Clients/client";
 import Produits from "@/features/Produits/produits";
 import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
+
 import RetoursPage from "@/features/retours/RetoursPage";
 import HistoriquesPage from "@/features/Historique/HistoriquesPage";
+
+import AjouterProduitPage from "@/features/Produits/ajouter/page";
+import ProduitDetailPage from "@/features/Produits/[id]/detailsPage";
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -30,9 +35,15 @@ export function AppRoutes() {
           <Route path="commandes" element={<CommandesPage />} />
           <Route path="liste-noire" element={<ListeNoirePage />} />
           <Route path="client" element={<Clients />} />
-          <Route path="Produits" element={<Produits />} />
+
            <Route path="Retours" element={<RetoursPage />} />
-        <Route path="Historiques" element={<HistoriquesPage />} />
+        <Route path="historique" element={<HistoriquesPage />} />
+
+
+          <Route path="produits" element={<Produits />} />
+          <Route path="/produits/ajouter" element={<AjouterProduitPage />} />
+          <Route path="/produits/:id" element={<ProduitDetailPage />} />
+
         </Route>
       </Route>
     </Routes>

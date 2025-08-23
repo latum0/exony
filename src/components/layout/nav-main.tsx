@@ -1,14 +1,12 @@
-"use client";
-
-import { type LucideIcon } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { useEffect, useState } from "react";
+} from "../ui/sidebar";
+import type { LucideIcon } from "lucide-react";
 
 export function NavMain({
   items,
@@ -19,11 +17,8 @@ export function NavMain({
     icon?: LucideIcon;
   }[];
 }) {
-  const [activePath, setActivePath] = useState("");
-
-  useEffect(() => {
-    setActivePath(window.location.pathname);
-  }, []);
+  const location = useLocation();
+  const activePath = location.pathname;
 
   return (
     <SidebarGroup>
@@ -42,7 +37,7 @@ export function NavMain({
                       : "text-muted-foreground hover:bg-neutral-200/50 "
                   }`}
                 >
-                  <a href={item.url} onClick={() => setActivePath(item.url)}>
+                  <Link to={item.url}>
                     {item.icon && (
                       <item.icon
                         className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${
@@ -51,13 +46,13 @@ export function NavMain({
                       />
                     )}
                     <span
-                      className={`trancate ${
+                      className={`truncate ${
                         isActive ? "text-[#F8A67E]" : "text-muted-foreground"
                       }`}
                     >
                       {item.title}
                     </span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );

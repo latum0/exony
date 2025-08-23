@@ -51,7 +51,7 @@ export function DataTable<TData, TValue>({
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [globalFilter, setGlobalFilter] = React.useState("");
-
+  console.log(data);
   const table = useReactTable({
     data,
     columns,
@@ -85,7 +85,7 @@ export function DataTable<TData, TValue>({
           placeholder="Rechercher ..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          className="max-w-sm  border-gray-300 rounded-md shadow-sm bg-neutral-50 "
+          className="max-w-sm  border-gray-300 rounded-md  bg-neutral-50 "
         />
       </div>
       <div className="rounded-lg border shadow-sm overflow-hidden">

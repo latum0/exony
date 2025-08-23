@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { HistoryIcon, TrashIcon, Eye, Calendar, User, FileText } from "lucide-react";
+import { HistoryIcon, TrashIcon, Eye, Calendar, User, FileText, Filter, RotateCcw } from "lucide-react";
 import { useHistorique } from "@/hooks/useHistorique";
 import {
   Table,
@@ -203,9 +203,11 @@ export const HistoriquesPage = () => {
         </div>
         <div className="flex gap-2 mt-3">
           <Button onClick={applyFilters} className="bg-[#F8A67E] hover:bg-[#F8A67E]/90">
+           <Filter className="w-4 h-4 mr-2" />
             Appliquer les filtres
           </Button>
           <Button variant="outline" onClick={clearFilters}>
+                <RotateCcw className="w-4 h-4 mr-2" />
             Réinitialiser
           </Button>
         </div>

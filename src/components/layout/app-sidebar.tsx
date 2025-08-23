@@ -47,8 +47,8 @@ const data = {
     { title: "Clients", url: "/client", icon: UserIcon },
     { title: "Liste noire", url: "/liste-noire", icon: UserXIcon },
     { title: "Produits", url: "/produits", icon: PackageIcon },
-      { title: "Retours", url: "/retours", icon: Undo2 },
-      { title: "Historiques", url: "/historique", icon: History},
+     { title: "Retours", url: "/retours", icon: Undo2 },
+      { title: "historiques", url: "/historique", icon: History},
   ],
 
   navClouds: [

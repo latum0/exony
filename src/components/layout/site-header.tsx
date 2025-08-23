@@ -1,23 +1,23 @@
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Input } from "@/components/ui/input"
-import { SearchIcon } from "lucide-react"
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Input } from "@/components/ui/input";
+import { SearchIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MoonIcon, SunIcon } from "lucide-react"
-import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MoonIcon, SunIcon } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
-  const { setTheme, theme } = useTheme()
+  const { setTheme, theme } = useTheme();
 
   return (
-    <header className="fixed top-0 bg-white w-full z-50 h-14 flex items-center border-b transition-[width,height] ease-linear">
+    <header className="fixed top-0 bg-[#fafafa] w-full z-50 h-16 flex items-center shadow-sm border-b transition-[width,height] ease-linear">
       <div className="flex w-full items-center px-4 lg:px-6">
         {/* Partie gauche */}
         <div className="flex items-center gap-2 lg:hidden">
@@ -31,14 +31,16 @@ export function SiteHeader() {
 
         {/* Partie droite : Barre de recherche */}
         <div className="ml-auto flex items-center gap-4">
-         
-
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
-            {theme === "dark" ? <SunIcon className="w-4 h-4" /> : <MoonIcon className="w-4 h-4" />}
+            {theme === "dark" ? (
+              <SunIcon className="w-4 h-4" />
+            ) : (
+              <MoonIcon className="w-4 h-4" />
+            )}
           </Button>
 
           <DropdownMenu>
@@ -57,5 +59,5 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }

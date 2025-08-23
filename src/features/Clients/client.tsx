@@ -117,15 +117,16 @@ export const UsersPage = () => {
   return (
     <div className="py-6 px-2">
       <div className="flex justify-between items-center mb-4 ">
-        <h2 className="text-2xl font-bold gap-x-2 flex items-center text-[#F8A67E]">
+        <h2 className="text-[27px] font-bold gap-x-2 flex items-center text-[#F8A67E]">
           <CogIcon size={28} /> Gestion des Clients
         </h2>
         <Button
           onClick={() => setAddDialogOpen(true)}
           style={{ background: "#F8A67E", borderRadius: "8px" }}
+          className="h-11 text-base"
         >
-          <PlusCircleIcon className="w-4 h-4 mr-[3px]" />
-          Ajouter
+          <PlusCircleIcon className="w-4 h-4 mr-0.5" />
+          Ajouter un client
         </Button>
         <UserFormDialog
           open={isAddDialogOpen}
