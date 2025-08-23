@@ -4,6 +4,7 @@ import userReducer from "./slices/usersSlice";
 import profileReducer from "./slices/profileSlice";
 import clientsReducer from "./slices/clients-slice";
 import blacklistClientsReducer from "./slices/blacklist-slice";
+import produits from "./slices/produits-slice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -11,6 +12,7 @@ export const store = configureStore({
     profile: profileReducer,
     clients: clientsReducer,
     blacklistClients: blacklistClientsReducer,
+    produits,
   },
 });
 

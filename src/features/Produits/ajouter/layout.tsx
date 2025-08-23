@@ -1,10 +1,8 @@
-// layout.tsx
-import { Outlet } from "react-router-dom";
-import { SiteHeader } from "@/components/layout/site-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { SiteHeader } from "@/components/layout/site-header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
-export default function DashboardLayout() {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-screen overflow-hidden">
@@ -16,8 +14,8 @@ export default function DashboardLayout() {
           <SiteHeader />
 
           {/* Outlet = contenu de la page actuelle */}
-          <main className="flex-1 overflow-y-auto px-4 pt-16 md:px-6  ">
-            <Outlet />
+          <main className="flex-1 overflow-y-auto pt-14 bg-[#fafafa] ">
+            {children}
           </main>
         </div>
       </div>
