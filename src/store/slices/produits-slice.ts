@@ -5,6 +5,7 @@ import {
   fetchProduits,
   deleteProduit,
   fetchFournisseurs,
+  fetchProduit,
 } from "@/hooks/produits-hook";
 
 import type { Produit } from "@/components/produits/columns";
@@ -19,6 +20,7 @@ interface Pagination {
 
 interface ProduitState {
   produits: Produit[];
+  produit: Produit;
   fournisseurs: Fournisseur[];
   pagination: Pagination | null;
   loading: boolean;
@@ -27,6 +29,7 @@ interface ProduitState {
 
 const initialState: ProduitState = {
   produits: [],
+  produit: {} as Produit,
   fournisseurs: [],
   pagination: null,
   loading: false,
@@ -49,6 +52,19 @@ const produitsSlice = createSlice({
       state.loading = false;
     });
     builder.addCase(fetchProduits.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message || "Failed to fetch produits.";
+    });
+    builder.addCase(fetchProduit.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchProduit.fulfilled, (state, action) => {
+      state.produit = action.payload;
+      console.log(state.produit);
+      state.loading = false;
+    });
+    builder.addCase(fetchProduit.rejected, (state, action) => {
       state.loading = false;
       state.error = action.error.message || "Failed to fetch produits.";
     });

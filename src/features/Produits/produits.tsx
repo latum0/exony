@@ -134,7 +134,8 @@ export default function ProduitsPage() {
             className="bg-[#F8A67E] hover:bg-[#F8A67E]/90 h-11 text-base "
             onClick={() => navigate("/produits/ajouter")}
           >
-            <PlusCircleIcon className="w-5 h-5 mr-0.5" />j Ajouter un produit
+            <PlusCircleIcon className="w-5 h-5 mr-0.5" />
+            Ajouter un produit
           </Button>
         </div>
 

@@ -64,14 +64,12 @@ export const getProduitColumns = ({
         const produit = row.original;
         return (
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100">
+            <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100 border">
               {produit.images && (
                 <img
                   src={`${API_BASE_URL}/uploads/produits/${produit.images}`}
                   alt={produit.nom}
-                  width={48}
-                  height={48}
-                  className="object-cover"
+                  className="w-full h-full object-cover"
                 />
               )}
             </div>

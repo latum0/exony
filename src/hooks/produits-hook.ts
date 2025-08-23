@@ -90,6 +90,14 @@ export const fetchProduits = createAsyncThunk(
     return response.data;
   }
 );
+export const fetchProduit = createAsyncThunk(
+  "produits/fetchOne",
+  async (id: string) => {
+    const response = await api.get(`/produits/${id}`);
+
+    return response.data;
+  }
+);
 export const fetchFournisseurs = createAsyncThunk(
   "fournisseurs/fetchAll",
   async () => {

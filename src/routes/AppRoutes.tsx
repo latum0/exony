@@ -13,6 +13,7 @@ import Clients from "@/features/Clients/client";
 import Produits from "@/features/Produits/produits";
 import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
 import AjouterProduitPage from "@/features/Produits/ajouter/page";
+import ProduitDetailPage from "@/features/Produits/[id]/detailsPage";
 export function AppRoutes() {
   return (
     <Routes>
@@ -31,6 +32,7 @@ export function AppRoutes() {
           <Route path="client" element={<Clients />} />
           <Route path="produits" element={<Produits />} />
           <Route path="/produits/ajouter" element={<AjouterProduitPage />} />
+          <Route path="/produits/:id" element={<ProduitDetailPage />} />
         </Route>
       </Route>
     </Routes>
