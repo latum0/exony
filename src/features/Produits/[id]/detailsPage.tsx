@@ -13,13 +13,13 @@ import {
   Building2,
   QrCode,
   Truck,
-  AlertCircle,
   Loader2,
 } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { fetchProduit } from "@/hooks/produits-hook";
 import type { AppDispatch, RootState } from "@/store";
 import { API_BASE_URL } from "@/constants/config";
+import type { Fournisseur } from "../ajouter/page";
 
 export default function ProduitDetailPage() {
   const { id } = useParams();
@@ -54,21 +54,7 @@ export default function ProduitDetailPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-10 h-10 text-red-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Erreur</h2>
-          <p className="text-slate-600">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!produit) {
+  if (!produit || error) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">
@@ -101,7 +87,7 @@ export default function ProduitDetailPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6 py-8">
         <div className="flex flex-col xl:flex-row gap-8 mb-8">
           {/* Images Section - Left 45% */}
           <div className="xl:w-[45%]">
@@ -207,14 +193,14 @@ export default function ProduitDetailPage() {
                 </button>
               </div>
               <p
-                className={`text-slate-600 leading-relaxed ${
+                className={`text-slate-600 leading-relaxed transition-all ${
                   isDescriptionExpanded ? "" : "line-clamp-3"
                 }`}
               >
                 {produit.description}
               </p>
             </div>
-            <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-200/50">
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/50">
               {/* Ligne icône + texte */}
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-[#F8A67E]/20 rounded-lg flex items-center justify-center">
@@ -302,18 +288,18 @@ export default function ProduitDetailPage() {
                 Fournisseurs
               </h3>
               <div className="flex flex-wrap gap-3">
-                {produit.fournisseurs.map((fournisseur: any, index: number) => (
-                  <div
-                    key={index}
-                    className="px-4 py-2 bg-gradient-to-r from-[#F8A67E]/10 to-[#F8A67E]/5 border border-[#F8A67E]/20 rounded-xl"
-                  >
-                    <span className="text-slate-700 font-medium">
-                      {fournisseur.nom ||
-                        fournisseur.name ||
-                        `Fournisseur ${index + 1}`}
-                    </span>
-                  </div>
-                ))}
+                {produit.fournisseurs?.map(
+                  (fournisseur: Fournisseur, index: number) => (
+                    <div
+                      key={index}
+                      className="px-4 py-2 bg-gradient-to-r from-[#F8A67E]/10 to-[#F8A67E]/5 border border-[#F8A67E]/20 rounded-xl"
+                    >
+                      <span className="text-slate-700 font-medium">
+                        {fournisseur.nom || `Fournisseur ${index + 1}`}
+                      </span>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           )}

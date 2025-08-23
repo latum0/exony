@@ -21,8 +21,11 @@ import {
 import { API_BASE_URL } from "@/constants/config";
 import { QRCodeCell } from "./QRCodeCell";
 import { Badge } from "../ui/badge";
+import type { Fournisseur } from "@/features/Produits/ajouter/page";
 
 export interface Produit {
+  fournisseurs: Fournisseur;
+  createdAt: string;
   idProduit: string;
   nom: string;
   description: string;

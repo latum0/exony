@@ -18,6 +18,8 @@ import HistoriquesPage from "@/features/Historique/HistoriquesPage";
 
 import AjouterProduitPage from "@/features/Produits/ajouter/page";
 import ProduitDetailPage from "@/features/Produits/[id]/detailsPage";
+import ModifierProduitPage from "@/features/Produits/[id]/modifier/editPage";
+
 
 export function AppRoutes() {
   return (
@@ -43,6 +45,11 @@ export function AppRoutes() {
           <Route path="produits" element={<Produits />} />
           <Route path="/produits/ajouter" element={<AjouterProduitPage />} />
           <Route path="/produits/:id" element={<ProduitDetailPage />} />
+
+          <Route
+            path="/produits/:id/modifier"
+            element={<ModifierProduitPage />}
+          />
 
         </Route>
       </Route>
