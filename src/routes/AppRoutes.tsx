@@ -12,6 +12,8 @@ import PrivateRoute from "@/components/PrivateRoute";
 import Clients from "@/features/Clients/client";
 import Produits from "@/features/Produits/produits";
 import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
+import RetoursPage from "@/features/retours/RetoursPage";
+import HistoriquesPage from "@/features/Historique/HistoriquesPage";
 export function AppRoutes() {
   return (
     <Routes>
@@ -29,6 +31,8 @@ export function AppRoutes() {
           <Route path="liste-noire" element={<ListeNoirePage />} />
           <Route path="client" element={<Clients />} />
           <Route path="Produits" element={<Produits />} />
+           <Route path="Retours" element={<RetoursPage />} />
+        <Route path="Historiques" element={<HistoriquesPage />} />
         </Route>
       </Route>
     </Routes>

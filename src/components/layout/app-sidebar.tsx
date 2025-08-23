@@ -18,6 +18,9 @@ import {
   UserXIcon,
   PackageIcon,
   UserIcon,
+  PackageSearch,
+  Undo2,
+  History,
 } from "lucide-react";
 
 import useProfile from "@/hooks/useProfile";
@@ -44,6 +47,8 @@ const data = {
     { title: "Clients", url: "/client", icon: UserIcon },
     { title: "Liste noire", url: "/liste-noire", icon: UserXIcon },
     { title: "Produits", url: "/produits", icon: PackageIcon },
+      { title: "Retours", url: "/retours", icon: Undo2 },
+      { title: "Historiques", url: "/historique", icon: History},
   ],
 
   navClouds: [
