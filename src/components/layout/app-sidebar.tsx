@@ -8,17 +8,13 @@ import {
   FileCodeIcon,
   FileIcon,
   FileTextIcon,
-  HelpCircleIcon,
   LayoutDashboardIcon,
-  SearchIcon,
-  SettingsIcon,
   UsersIcon,
   FactoryIcon,
   ShoppingCartIcon,
   UserXIcon,
   PackageIcon,
   UserIcon,
-  PackageSearch,
   Undo2,
   History,
 } from "lucide-react";
@@ -37,6 +33,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Link } from "react-router-dom";
 
 const data = {
   navMain: [
@@ -47,8 +44,8 @@ const data = {
     { title: "Clients", url: "/client", icon: UserIcon },
     { title: "Liste noire", url: "/liste-noire", icon: UserXIcon },
     { title: "Produits", url: "/produits", icon: PackageIcon },
-     { title: "Retours", url: "/retours", icon: Undo2 },
-      { title: "historiques", url: "/historique", icon: History},
+    { title: "Retours", url: "/retours", icon: Undo2 },
+    { title: "historiques", url: "/historique", icon: History },
   ],
 
   navClouds: [
@@ -99,23 +96,7 @@ const data = {
       ],
     },
   ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: HelpCircleIcon,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: SearchIcon,
-    },
-  ],
+
   documents: [
     {
       name: "Data Library",
@@ -151,9 +132,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:!p-1.5 bg-none hover:bg-none"
             >
-              <a href="#" className="flex items-center gap-2">
+              <Link to="/" className="flex items-center gap-2">
                 <img
                   src="logoexony.png"
                   alt="Logo Exony"
@@ -162,7 +143,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <span className="text-2xl text-[#F8A67E]  mt-2 font-semibold font-poppins">
                   Exony
                 </span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -170,7 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="mt-4">
         <NavMain items={data.navMain} />
 
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

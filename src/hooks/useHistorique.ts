@@ -1,12 +1,14 @@
-
-import { useState } from 'react';
+import { useState } from "react";
 import api from "@/api/axios";
 
 export interface Historique {
   idHistorique: number;
   dateModification: string;
   descriptionAction: string;
-  acteur: string;
+  utilisateur: {
+    id: number;
+    name: string;
+  };
   utilisateurId: number;
   createdAt?: string;
   updatedAt?: string;
@@ -52,12 +54,14 @@ export const useHistorique = (): UseHistoriqueReturn => {
 
   const handleApiError = (error: unknown) => {
     let errorMessage = "Une erreur est survenue";
-    
-    if (typeof error === 'object' && error !== null) {
-      if ('response' in error) {
-        const axiosError = error as { response: { data: { message?: string } } };
+
+    if (typeof error === "object" && error !== null) {
+      if ("response" in error) {
+        const axiosError = error as {
+          response: { data: { message?: string } };
+        };
         errorMessage = axiosError.response.data.message || errorMessage;
-      } else if ('message' in error) {
+      } else if ("message" in error) {
         errorMessage = (error as { message: string }).message;
       }
     }
@@ -72,16 +76,20 @@ export const useHistorique = (): UseHistoriqueReturn => {
     setError(null);
     try {
       const params = new URLSearchParams();
-      
-      if (filters.page) params.append('page', filters.page.toString());
-      if (filters.perPage) params.append('perPage', filters.perPage.toString());
-      if (filters.acteur) params.append('acteur', filters.acteur);
-      if (filters.descriptionAction) params.append('descriptionAction', filters.descriptionAction);
-      if (filters.utilisateurId) params.append('utilisateurId', filters.utilisateurId.toString());
-      if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
-      if (filters.dateTo) params.append('dateTo', filters.dateTo);
 
-      const response = await api.get<PaginatedResponse<Historique>>(`/historiques?${params.toString()}`);
+      if (filters.page) params.append("page", filters.page.toString());
+      if (filters.perPage) params.append("perPage", filters.perPage.toString());
+      if (filters.acteur) params.append("acteur", filters.acteur);
+      if (filters.descriptionAction)
+        params.append("descriptionAction", filters.descriptionAction);
+      if (filters.utilisateurId)
+        params.append("utilisateurId", filters.utilisateurId.toString());
+      if (filters.dateFrom) params.append("dateFrom", filters.dateFrom);
+      if (filters.dateTo) params.append("dateTo", filters.dateTo);
+
+      const response = await api.get<PaginatedResponse<Historique>>(
+        `/historiques?${params.toString()}`
+      );
       setHistoriques(response.data.data);
       setLoading(false);
     } catch (error) {
@@ -106,7 +114,7 @@ export const useHistorique = (): UseHistoriqueReturn => {
     setError(null);
     try {
       await api.delete(`/historiques/${id}`);
-      setHistoriques(prev => prev.filter(h => h.idHistorique !== id));
+      setHistoriques((prev) => prev.filter((h) => h.idHistorique !== id));
       if (historique?.idHistorique === id) {
         setHistorique(null);
       }
@@ -122,7 +130,9 @@ export const useHistorique = (): UseHistoriqueReturn => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.delete<{ deleted: number }>('/historiques/old');
+      const response = await api.delete<{ deleted: number }>(
+        "/historiques/old"
+      );
       setLoading(false);
       return response.data.deleted;
     } catch (error) {

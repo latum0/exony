@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { HistoryIcon, TrashIcon, Eye, Calendar, User, FileText, Filter, RotateCcw } from "lucide-react";
-import { useHistorique } from "@/hooks/useHistorique";
+import { HistoryIcon, TrashIcon, Eye, Filter, RotateCcw } from "lucide-react";
+import { useHistorique, type Historique } from "@/hooks/useHistorique";
 import {
   Table,
   TableBody,
@@ -37,25 +36,30 @@ export const HistoriquesPage = () => {
   } = useHistorique();
 
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [historiqueToDelete, setHistoriqueToDelete] = useState<Historique | null>(null);
+  const [historiqueToDelete, setHistoriqueToDelete] =
+    useState<Historique | null>(null);
   const [isViewDialogOpen, setViewDialogOpen] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [filters, setFilters] = useState({
     acteur: "",
     descriptionAction: "",
     dateFrom: "",
-    dateTo: ""
+    dateTo: "",
   });
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const filteredHistoriques = Array.isArray(historiques) 
-    ? historiques.filter(h =>
-        h.acteur?.toLowerCase().includes(globalFilter.toLowerCase()) ||
-        h.descriptionAction?.toLowerCase().includes(globalFilter.toLowerCase()) ||
-        h.utilisateurId?.toString().includes(globalFilter)
+  const filteredHistoriques = Array.isArray(historiques)
+    ? historiques.filter(
+        (h) =>
+          h.utilisateur?.name
+            ?.toLowerCase()
+            .includes(globalFilter.toLowerCase()) ||
+          h.descriptionAction
+            ?.toLowerCase()
+            .includes(globalFilter.toLowerCase())
       )
     : [];
 
@@ -70,7 +74,7 @@ export const HistoriquesPage = () => {
       await getHistoriques({
         page: pagination.pageIndex + 1,
         perPage: pagination.pageSize,
-        ...filters
+        ...filters,
       });
     } catch (error) {
       console.error("Erreur lors du chargement des historiques:", error);
@@ -113,17 +117,17 @@ export const HistoriquesPage = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const applyFilters = () => {
-    setPagination(prev => ({ ...prev, pageIndex: 0 }));
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
     handleGetHistoriques();
   };
 
@@ -132,10 +136,10 @@ export const HistoriquesPage = () => {
       acteur: "",
       descriptionAction: "",
       dateFrom: "",
-      dateTo: ""
+      dateTo: "",
     });
     setGlobalFilter("");
-    setPagination(prev => ({ ...prev, pageIndex: 0 }));
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
   return (
@@ -147,7 +151,7 @@ export const HistoriquesPage = () => {
         <Button
           onClick={handleCleanOld}
           variant="outline"
-          className="text-red-500 border-red-500 hover:bg-red-500/10"
+          className="text-red-500 hover:text-red-600 border-red-500 hover:bg-red-500/10"
         >
           <TrashIcon className="w-4 h-4 mr-2" />
           Nettoyer les anciens
@@ -161,53 +165,75 @@ export const HistoriquesPage = () => {
       )}
 
       {/* Filtres avancés */}
-      <div className="bg-gray-50 p-4 rounded-lg mb-4">
+      <div className="bg-gray-50 p-4 rounded-lg mb-4 border">
         <h3 className="font-semibold mb-3 text-gray-700">Filtres avancés</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Acteur</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Acteur
+            </label>
             <Input
               placeholder="Filtrer par acteur"
               value={filters.acteur}
-              onChange={(e) => setFilters(prev => ({ ...prev, acteur: e.target.value }))}
-              className="border-gray-300"
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, acteur: e.target.value }))
+              }
+              className="border-gray-300  bg-white/50"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Description</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Description
+            </label>
             <Input
               placeholder="Filtrer par description"
               value={filters.descriptionAction}
-              onChange={(e) => setFilters(prev => ({ ...prev, descriptionAction: e.target.value }))}
-              className="border-gray-300"
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  descriptionAction: e.target.value,
+                }))
+              }
+              className="border-gray-300 bg-white/50"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Date début</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Date début
+            </label>
             <Input
               type="date"
               value={filters.dateFrom}
-              onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
-              className="border-gray-300"
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, dateFrom: e.target.value }))
+              }
+              className="border-gray-300 bg-white/50"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Date fin</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Date fin
+            </label>
             <Input
               type="date"
               value={filters.dateTo}
-              onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
-              className="border-gray-300"
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, dateTo: e.target.value }))
+              }
+              className="border-gray-300 bg-white/50"
             />
           </div>
         </div>
         <div className="flex gap-2 mt-3">
-          <Button onClick={applyFilters} className="bg-[#F8A67E] hover:bg-[#F8A67E]/90">
-           <Filter className="w-4 h-4 mr-2" />
+          <Button
+            onClick={applyFilters}
+            className="bg-[#F8A67E] hover:bg-[#F8A67E]/90"
+          >
+            <Filter className="w-4 h-4 mr-2" />
             Appliquer les filtres
           </Button>
           <Button variant="outline" onClick={clearFilters}>
-                <RotateCcw className="w-4 h-4 mr-2" />
+            <RotateCcw className="w-4 h-4 mr-2" />
             Réinitialiser
           </Button>
         </div>
@@ -215,17 +241,17 @@ export const HistoriquesPage = () => {
 
       <div className="w-full">
         <div className="flex items-center py-4 gap-2">
-          <Input
-            placeholder="Rechercher par acteur, description ou ID utilisateur..."
+          {/* <Input
+            placeholder="Rechercher par acteur ou description..."
             value={globalFilter}
             onChange={(e) => {
               setGlobalFilter(e.target.value);
-              setPagination(prev => ({ ...prev, pageIndex: 0 }));
+              setPagination((prev) => ({ ...prev, pageIndex: 0 }));
             }}
             className="max-w-sm border-gray-300 rounded-md shadow-sm bg-neutral-50"
-          />
+          /> */}
         </div>
-        
+
         <div className="rounded-lg border shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <Table className="min-w-full">
@@ -240,15 +266,13 @@ export const HistoriquesPage = () => {
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
                     Description
                   </TableHead>
-                  <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
-                    Utilisateur ID
-                  </TableHead>
+
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
                     Actions
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              
+
               <TableBody>
                 {loading ? (
                   <TableRow>
@@ -265,29 +289,36 @@ export const HistoriquesPage = () => {
                       colSpan={5}
                       className="h-24 text-center text-gray-500"
                     >
-                      {globalFilter || Object.values(filters).some(f => f) ? "Aucun résultat trouvé" : "Aucun historique enregistré"}
+                      {globalFilter || Object.values(filters).some((f) => f)
+                        ? "Aucun résultat trouvé"
+                        : "Aucun historique enregistré"}
                     </TableCell>
                   </TableRow>
                 ) : (
                   paginatedHistoriques.map((h, index) => (
                     <TableRow
                       key={h.idHistorique}
-                      className={index % 2 === 0 ? "bg-white hover:bg-gray-50" : "bg-gray-50 hover:bg-gray-100"}
+                      className={
+                        index % 2 === 0
+                          ? "bg-white hover:bg-gray-50"
+                          : "bg-gray-50 hover:bg-gray-100"
+                      }
                     >
                       <TableCell className="py-3 px-4 whitespace-nowrap">
                         {formatDate(h.dateModification)}
                       </TableCell>
                       <TableCell className="py-3 px-4 whitespace-nowrap">
-                        {h.acteur}
+                        {h.utilisateur?.name}
                       </TableCell>
                       <TableCell className="py-3 px-4">
-                        <div className="max-w-md truncate" title={h.descriptionAction}>
+                        <div
+                          className="max-w-md truncate"
+                          title={h.descriptionAction}
+                        >
                           {h.descriptionAction}
                         </div>
                       </TableCell>
-                      <TableCell className="py-3 px-4 whitespace-nowrap">
-                        {h.utilisateurId}
-                      </TableCell>
+
                       <TableCell className="py-3 px-4 whitespace-nowrap">
                         <div className="flex gap-2">
                           <Button
@@ -326,10 +357,10 @@ export const HistoriquesPage = () => {
               <Select
                 value={`${pagination.pageSize}`}
                 onValueChange={(value) => {
-                  setPagination(prev => ({
+                  setPagination((prev) => ({
                     ...prev,
                     pageSize: Number(value),
-                    pageIndex: 0
+                    pageIndex: 0,
                   }));
                 }}
               >
@@ -353,10 +384,12 @@ export const HistoriquesPage = () => {
                 variant="outline"
                 size="icon"
                 className="size-8 bg-transparent hover:bg-gray-100"
-                onClick={() => setPagination(prev => ({
-                  ...prev,
-                  pageIndex: Math.max(prev.pageIndex - 1, 0)
-                }))}
+                onClick={() =>
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageIndex: Math.max(prev.pageIndex - 1, 0),
+                  }))
+                }
                 disabled={pagination.pageIndex === 0}
               >
                 <span className="sr-only">Aller à la page précédente</span>
@@ -366,10 +399,12 @@ export const HistoriquesPage = () => {
                 variant="outline"
                 size="icon"
                 className="size-8 bg-transparent hover:bg-gray-100"
-                onClick={() => setPagination(prev => ({
-                  ...prev,
-                  pageIndex: Math.min(prev.pageIndex + 1, pageCount - 1)
-                }))}
+                onClick={() =>
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageIndex: Math.min(prev.pageIndex + 1, pageCount - 1),
+                  }))
+                }
                 disabled={pagination.pageIndex >= pageCount - 1}
               >
                 <span className="sr-only">Aller à la page suivante</span>
@@ -384,7 +419,11 @@ export const HistoriquesPage = () => {
         open={isDeleteDialogOpen}
         onConfirm={confirmDelete}
         onCancel={() => setDeleteDialogOpen(false)}
-        itemName={historiqueToDelete ? `l'historique #${historiqueToDelete.idHistorique}` : "cet historique"}
+        itemName={
+          historiqueToDelete
+            ? `l'historique #${historiqueToDelete.idHistorique}`
+            : "cet historique"
+        }
       />
 
       <HistoriqueDetailsModal
