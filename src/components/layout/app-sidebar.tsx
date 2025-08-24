@@ -2,12 +2,6 @@
 
 import * as React from "react";
 import {
-  CameraIcon,
-  ClipboardListIcon,
-  DatabaseIcon,
-  FileCodeIcon,
-  FileIcon,
-  FileTextIcon,
   LayoutDashboardIcon,
   UsersIcon,
   FactoryIcon,
@@ -19,11 +13,8 @@ import {
   History,
 } from "lucide-react";
 
-import useProfile from "@/hooks/useProfile";
-
 import { NavMain } from "@/components/layout/nav-main";
-import { NavSecondary } from "@/components/layout/nav-secondary";
-import { NavUser } from "@/components/layout/nav-user";
+
 import {
   Sidebar,
   SidebarContent,
@@ -47,84 +38,9 @@ const data = {
     { title: "Retours", url: "/retours", icon: Undo2 },
     { title: "historiques", url: "/historique", icon: History },
   ],
-
-  navClouds: [
-    {
-      title: "Capture",
-      icon: CameraIcon,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: FileCodeIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: DatabaseIcon,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: ClipboardListIcon,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: FileIcon,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { profile } = useProfile();
-
-  const user = {
-    name: profile?.name || "Utilisateur",
-    email: profile?.role || "Email inconnu",
-    //   avatar: "/avatars/shadcn.jpg",
-  };
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -153,9 +69,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={user} />
-      </SidebarFooter>
+      <SidebarFooter></SidebarFooter>
     </Sidebar>
   );
 }

@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -12,25 +13,24 @@ export default function ResetPasswordPage() {
 
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
     setLoading(true);
 
     try {
-      const res = await api.post("/auth/reset-password", {
+      await api.post("/auth/reset-password", {
         token,
         newPassword,
       });
 
-      setSuccess("Mot de passe réinitialisé avec succès !");
-      setTimeout(() => navigate("/"), 2500);
+      toast.success("Mot de passe réinitialisé avec succès !");
+      setTimeout(() => navigate("/"), 500);
     } catch (err: any) {
       setError(err.response?.data?.message || "Une erreur s’est produite.");
+      toast.error(err.response?.data?.message || "Une erreur s’est produite.");
     } finally {
       setLoading(false);
     }
@@ -39,14 +39,15 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-red-500 font-semibold">Token invalide ou manquant.</p>
+        <p className="text-red-500 font-semibold">
+          Token invalide ou manquant.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="relative w-screen h-screen flex items-center justify-center bg-gray-50 overflow-hidden">
-
       {/* Logos flottants */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         {[...Array(6)].map((_, i) => (
@@ -54,7 +55,7 @@ export default function ResetPasswordPage() {
             key={i}
             src="/logoexony.png"
             alt="Floating Logo"
-            className="absolute w-20 h-20 opacity-30 animate-slide"
+            className="absolute w-20 h-20 opacity-30 "
             style={{
               top: `${i * 15}%`,
               left: `${Math.random() * 100}%`,
@@ -103,7 +104,6 @@ export default function ResetPasswordPage() {
         </Button>
 
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-        {success && <p className="text-green-600 text-sm text-center">{success}</p>}
       </form>
     </div>
   );
