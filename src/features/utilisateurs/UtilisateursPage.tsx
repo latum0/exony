@@ -18,15 +18,15 @@ export const UsersPage = () => {
   return (
     <div className="p-6 ">
       <div className="flex justify-between items-center mb-4 ">
-         <h2 className="text-2xl font-bold gap-x-2  flex items-center text-[#F8A67E]">
+        <h2 className="text-[27px]  font-bold gap-x-2  flex items-center text-[#F8A67E]">
           <CogIcon size={28} /> Gestion des utilisateurs
         </h2>
         <Button
           onClick={() => setDialogOpen(true)}
-            style={{ background: "#F8A67E", borderRadius: "8px" }}
+          style={{ background: "#F8A67E", borderRadius: "8px" }}
         >
           <PlusCircleIcon className="w-4 h-4 mr-[3px]" />
-          Ajouter
+          Ajouter un utilisateur
         </Button>
 
         <UserFormDialog

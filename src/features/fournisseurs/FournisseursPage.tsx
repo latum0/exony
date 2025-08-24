@@ -1,6 +1,12 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircleIcon, CogIcon, PencilIcon, TrashIcon, Eye } from "lucide-react";
+import {
+  PlusCircleIcon,
+  CogIcon,
+  PencilIcon,
+  TrashIcon,
+  Eye,
+} from "lucide-react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import {
   Table,
@@ -38,9 +44,11 @@ export const FournisseursPage = () => {
   } = useFournisseurs();
 
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [selectedFournisseur, setSelectedFournisseur] = useState<Fournisseur | null>(null);
+  const [selectedFournisseur, setSelectedFournisseur] =
+    useState<Fournisseur | null>(null);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [fournisseurToDelete, setFournisseurToDelete] = useState<Fournisseur | null>(null);
+  const [fournisseurToDelete, setFournisseurToDelete] =
+    useState<Fournisseur | null>(null);
   const [isViewDialogOpen, setViewDialogOpen] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [pagination, setPagination] = useState({
@@ -48,54 +56,61 @@ export const FournisseursPage = () => {
     pageSize: 5,
   });
 
-const filteredFournisseurs = Array.isArray(fournisseurs) 
-  ? fournisseurs.filter(f =>
-      f.nom?.toLowerCase().includes(globalFilter.toLowerCase()) ||
-      f.contact?.toLowerCase().includes(globalFilter.toLowerCase()) ||
-      f.email?.toLowerCase().includes(globalFilter.toLowerCase()) ||
-      f.telephone?.includes(globalFilter)
-    )
-  : [];
+  const filteredFournisseurs = Array.isArray(fournisseurs)
+    ? fournisseurs.filter(
+        (f) =>
+          f.nom?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+          f.contact?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+          f.email?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+          f.telephone?.includes(globalFilter)
+      )
+    : [];
 
-  const pageCount = Math.ceil(filteredFournisseurs.length / pagination.pageSize);
+  const pageCount = Math.ceil(
+    filteredFournisseurs.length / pagination.pageSize
+  );
   const paginatedFournisseurs = filteredFournisseurs.slice(
     pagination.pageIndex * pagination.pageSize,
     (pagination.pageIndex + 1) * pagination.pageSize
   );
   const handleGetFournisseurs = async () => {
-  try {
-    await getFournisseurs();
-  } catch (error) {
-    setDataError(true);
-  }
-};
+    try {
+      await getFournisseurs();
+    } catch (error) {
+      setDataError(true);
+    }
+  };
 
   useEffect(() => {
-  handleGetFournisseurs();
-}, []);
+    handleGetFournisseurs();
+  }, []);
   const handleCreateFournisseur = async (data: FournisseurInput) => {
     await createFournisseur(data);
     setDialogOpen(false);
     getFournisseurs();
   };
 
-const handleUpdateFournisseur = async (data: FournisseurInput) => {
-  if (selectedFournisseur) {
-    await updateFournisseur(selectedFournisseur.idFournisseur.toString(), data);
-    setDialogOpen(false);
-    setSelectedFournisseur(null);
-    getFournisseurs();
-  }
-};
+  const handleUpdateFournisseur = async (data: FournisseurInput) => {
+    if (selectedFournisseur) {
+      await updateFournisseur(
+        selectedFournisseur.idFournisseur.toString(),
+        data
+      );
+      setDialogOpen(false);
+      setSelectedFournisseur(null);
+      getFournisseurs();
+    }
+  };
 
-const handleViewDetails = async (idFournisseur: number) => {  // Changé de string à number
-  try {
-    await getFournisseur(idFournisseur.toString()); // Convertir en string pour l'URL
-    setViewDialogOpen(true);
-  } catch (error) {
-    console.error("Erreur lors de la récupération des détails:", error);
-  }
-};
+  const handleViewDetails = async (idFournisseur: number) => {
+    // Changé de string à number
+    try {
+      await getFournisseur(idFournisseur.toString()); // Convertir en string pour l'URL
+      setViewDialogOpen(true);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des détails:", error);
+    }
+  };
 
   const handleDeleteClick = (fournisseur: Fournisseur) => {
     setFournisseurToDelete(fournisseur);
@@ -111,21 +126,21 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
     }
   };
 
- const handleEdit = (fournisseur: Fournisseur) => {
-  setSelectedFournisseur({
-    idFournisseur: fournisseur.idFournisseur,
-    nom: fournisseur.nom,
-    adresse: fournisseur.adresse,
-    contact: fournisseur.contact,
-    telephone: fournisseur.telephone,
-    email: fournisseur.email
-  });
-  setDialogOpen(true);
-};
+  const handleEdit = (fournisseur: Fournisseur) => {
+    setSelectedFournisseur({
+      idFournisseur: fournisseur.idFournisseur,
+      nom: fournisseur.nom,
+      adresse: fournisseur.adresse,
+      contact: fournisseur.contact,
+      telephone: fournisseur.telephone,
+      email: fournisseur.email,
+    });
+    setDialogOpen(true);
+  };
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold gap-x-2 flex items-center text-[#F8A67E]">
+        <h2 className="text-[27px]  font-bold gap-x-2 flex items-center text-[#F8A67E]">
           <CogIcon size={28} /> Gestion des fournisseurs
         </h2>
         <Button
@@ -134,9 +149,10 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
             setDialogOpen(true);
           }}
           style={{ background: "#F8A67E", borderRadius: "8px" }}
+          className="h-9"
         >
           <PlusCircleIcon className="w-4 h-4 mr-[3px]" />
-          Ajouter
+          Ajouter un fournisseur
         </Button>
       </div>
 
@@ -153,17 +169,17 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
             value={globalFilter}
             onChange={(e) => {
               setGlobalFilter(e.target.value);
-              setPagination(prev => ({ ...prev, pageIndex: 0 }));
+              setPagination((prev) => ({ ...prev, pageIndex: 0 }));
             }}
             className="max-w-sm border-gray-300 rounded-md shadow-sm bg-neutral-50"
           />
         </div>
-        
+
         <div className="rounded-lg border shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <Table className="min-w-full">
               <TableHeader className="bg-gray-100">
-                <TableRow >
+                <TableRow>
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
                     Nom
                   </TableHead>
@@ -181,7 +197,7 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              
+
               <TableBody>
                 {loading ? (
                   <TableRow>
@@ -198,14 +214,20 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
                       colSpan={5}
                       className="h-24 text-center text-gray-500"
                     >
-                      {globalFilter ? "Aucun résultat trouvé" : "Aucun fournisseur enregistré"}
+                      {globalFilter
+                        ? "Aucun résultat trouvé"
+                        : "Aucun fournisseur enregistré"}
                     </TableCell>
                   </TableRow>
                 ) : (
                   paginatedFournisseurs.map((f, index) => (
                     <TableRow
                       key={f.id}
-                      className={index % 2 === 0 ? "bg-white hover:bg-gray-50" : "bg-gray-50 hover:bg-gray-100"}
+                      className={
+                        index % 2 === 0
+                          ? "bg-white hover:bg-gray-50"
+                          : "bg-gray-50 hover:bg-gray-100"
+                      }
                     >
                       <TableCell className="py-3 px-4 whitespace-nowrap">
                         {f.nom}
@@ -229,14 +251,14 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
                           >
                             <PencilIcon className="h-4 w-4" />
                           </Button>
-                         <Button
-  variant="outline"
-  size="sm"
-  className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
-  onClick={() => handleViewDetails(f.idFournisseur)}  
->
-  <Eye className="h-4 w-4" />
-</Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
+                            onClick={() => handleViewDetails(f.idFournisseur)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
@@ -265,10 +287,10 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
               <Select
                 value={`${pagination.pageSize}`}
                 onValueChange={(value) => {
-                  setPagination(prev => ({
+                  setPagination((prev) => ({
                     ...prev,
                     pageSize: Number(value),
-                    pageIndex: 0
+                    pageIndex: 0,
                   }));
                 }}
               >
@@ -292,10 +314,12 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
                 variant="outline"
                 size="icon"
                 className="size-8 bg-transparent hover:bg-gray-100"
-                onClick={() => setPagination(prev => ({
-                  ...prev,
-                  pageIndex: Math.max(prev.pageIndex - 1, 0)
-                }))}
+                onClick={() =>
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageIndex: Math.max(prev.pageIndex - 1, 0),
+                  }))
+                }
                 disabled={pagination.pageIndex === 0}
               >
                 <span className="sr-only">Aller à la page précédente</span>
@@ -305,10 +329,12 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
                 variant="outline"
                 size="icon"
                 className="size-8 bg-transparent hover:bg-gray-100"
-                onClick={() => setPagination(prev => ({
-                  ...prev,
-                  pageIndex: Math.min(prev.pageIndex + 1, pageCount - 1)
-                }))}
+                onClick={() =>
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageIndex: Math.min(prev.pageIndex + 1, pageCount - 1),
+                  }))
+                }
                 disabled={pagination.pageIndex >= pageCount - 1}
               >
                 <span className="sr-only">Aller à la page suivante</span>
@@ -326,7 +352,11 @@ const handleViewDetails = async (idFournisseur: number) => {  // Changé de stri
           setSelectedFournisseur(null);
         }}
         initialData={selectedFournisseur}
-        onSubmit={selectedFournisseur ? handleUpdateFournisseur : handleCreateFournisseur}
+        onSubmit={
+          selectedFournisseur
+            ? handleUpdateFournisseur
+            : handleCreateFournisseur
+        }
       />
 
       <DeleteConfirmationModal

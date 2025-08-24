@@ -123,7 +123,7 @@ export const UsersPage = () => {
         <Button
           onClick={() => setAddDialogOpen(true)}
           style={{ background: "#F8A67E", borderRadius: "8px" }}
-          className="h-11 text-base"
+          className=" "
         >
           <PlusCircleIcon className="w-4 h-4 mr-0.5" />
           Ajouter un client

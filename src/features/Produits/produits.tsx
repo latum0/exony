@@ -126,12 +126,12 @@ export default function ProduitsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Package className="w-8 h-8 text-[#F8A67E]" />
-            <h2 className="text-2xl font-bold gap-x-2 flex items-center text-[#F8A67E]">
+            <h2 className="text-[27px] font-bold gap-x-2 flex items-center text-[#F8A67E]">
               Gestion des produits
             </h2>
           </div>
           <Button
-            className="bg-[#F8A67E] hover:bg-[#F8A67E]/90 h-11 text-base "
+            className="bg-[#F8A67E] hover:bg-[#F8A67E]/90  "
             onClick={() => navigate("/produits/ajouter")}
           >
             <PlusCircleIcon className="w-5 h-5 mr-0.5" />
@@ -143,22 +143,27 @@ export default function ProduitsPage() {
         <Card className="bg-[#fbfbfb] mt-5">
           <CardContent className="">
             <div className="flex flex-col gap-y-1.5">
-              <div className="flex items-end justify-end gap-2 w-full">
-                <Button
-                  onClick={applyFilters}
-                  className="bg-[#F8A67E] hover:bg-[#F8A67E]/90 h-10"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  Appliquer les filtres
-                </Button>
-                <Button
-                  onClick={clearFilters}
-                  variant="outline"
-                  className=" h-10 bg-none hover:bg-gray-100"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Effacer les filtres
-                </Button>
+              <div className="w-full flex items-start justify-between">
+                <h2 className="font-semibold w-fit text-xl text-nowrap text-gray-700">
+                  Filtres avancés
+                </h2>
+                <div className="flex items-end justify-end gap-2 w-full">
+                  <Button
+                    onClick={applyFilters}
+                    className="bg-[#F8A67E] hover:bg-[#F8A67E]/90 h-10"
+                  >
+                    <Filter className="w-4 h-4 mr-2" />
+                    Appliquer les filtres
+                  </Button>
+                  <Button
+                    onClick={clearFilters}
+                    variant="outline"
+                    className=" h-10 bg-none hover:bg-gray-100"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Effacer les filtres
+                  </Button>
+                </div>
               </div>
               <div className="flex items-center gap-4 flex-1 mt-2">
                 <Input
