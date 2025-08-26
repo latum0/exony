@@ -118,14 +118,14 @@ export const FournisseursPage = () => {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (fournisseurToDelete) {
-      await deleteFournisseur(fournisseurToDelete.id);
-      setDeleteDialogOpen(false);
-      setFournisseurToDelete(null);
-      getFournisseurs();
-    }
-  };
+ const confirmDelete = async () => {
+  if (fournisseurToDelete) {
+    await deleteFournisseur(fournisseurToDelete.idFournisseur); // ← Utiliser idFournisseur
+    setDeleteDialogOpen(false);
+    setFournisseurToDelete(null);
+    getFournisseurs();
+  }
+};
 
   const handleEdit = (fournisseur: Fournisseur) => {
     setSelectedFournisseur({

@@ -1,4 +1,3 @@
-// src/pages/commandes/components/CommandeFormDialog.tsx
 import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Minus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
+
+// Schéma de validation Zod
+const ligneCommandeSchema = z.object({
+  produitId: z.string().min(1, "L'ID du produit est requis"),
+  quantite: z.number().min(1, "La quantité doit être au moins 1"),
+});
+
+// Schéma de validation pour la commande
+const commandeSchema = z.object({
+  dateCommande: z.string().min(1, "La date de commande est requise"),
+  statut: z.enum(["EN_ATTENTE", "EN_COURS", "LIVREE", "ANNULEE"]),
+  adresseLivraison: z.string().min(1, "L'adresse de livraison est requise"),
+  clientId: z.number({ 
+    invalid_type_error: "L'ID client doit être un nombre",
+    required_error: "L'ID client est requis"
+  }).min(1, "L'ID client doit être supérieur à 0"),
+  lignes: z.array(ligneCommandeSchema).min(1, "Au moins une ligne de commande est requise"),
+});
+
+type CommandeFormValues = z.infer<typeof commandeSchema>;
 
 interface CommandeFormDialogProps {
   open: boolean;
@@ -29,6 +50,8 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
   });
 
   const [newLigne, setNewLigne] = useState({ produitId: "", quantite: 1 });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [ligneErrors, setLigneErrors] = useState<Record<number, Record<string, string>>>({}); // Nouveau: erreurs par ligne
 
   useEffect(() => {
     if (initialData) {
@@ -51,42 +74,125 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
         lignes: [],
       });
     }
-  }, [initialData]);
+    setErrors({});
+    setLigneErrors({}); // Réinitialiser les erreurs de ligne
+  }, [initialData, open]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const addLigne = () => {
-    if (newLigne.produitId && newLigne.quantite > 0) {
-      setFormData(prev => ({
-        ...prev,
-        lignes: [...prev.lignes, newLigne],
-      }));
-      setNewLigne({ produitId: "", quantite: 1 });
+    
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
+  const addLigne = () => {
+    const ligneValidation = ligneCommandeSchema.safeParse({
+      produitId: newLigne.produitId,
+      quantite: newLigne.quantite,
+    });
+
+    if (!ligneValidation.success) {
+      const newErrors: Record<string, string> = {};
+      ligneValidation.error.errors.forEach(error => {
+        newErrors[error.path[0]] = error.message;
+      });
+      
+      toast.error("Erreur de validation", {
+        description: "Veuillez corriger les erreurs dans la ligne avant de l'ajouter",
+      });
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      lignes: [...prev.lignes, newLigne],
+    }));
+    setNewLigne({ produitId: "", quantite: 1 });
+  };
+
   const removeLigne = (index: number) => {
+    const ligneToRemove = formData.lignes[index];
     setFormData(prev => ({
       ...prev,
       lignes: prev.lignes.filter((_, i) => i !== index),
     }));
+    
+    // Supprimer aussi les erreurs associées à cette ligne
+    setLigneErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[index];
+      return newErrors;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Préparer les données pour la validation
     const submitData = {
-      ...formData,
-      clientId: parseInt(formData.clientId),
+      dateCommande: formData.dateCommande,
+      statut: formData.statut,
+      adresseLivraison: formData.adresseLivraison,
+      clientId: formData.clientId ? parseInt(formData.clientId) : 0,
       lignes: formData.lignes,
     };
-    onSubmit(submitData);
+
+    const validationResult = commandeSchema.safeParse(submitData);
+
+    if (!validationResult.success) {
+      const newErrors: Record<string, string> = {};
+      const newLigneErrors: Record<number, Record<string, string>> = {};
+      
+      validationResult.error.errors.forEach(error => {
+        const path = error.path.join('.');
+        
+        // Gérer les erreurs de lignes spécifiques
+        if (path.startsWith('lignes.')) {
+          const pathParts = path.split('.');
+          const ligneIndex = parseInt(pathParts[1]);
+          const fieldName = pathParts[2];
+          
+          if (!isNaN(ligneIndex)) {
+            if (!newLigneErrors[ligneIndex]) {
+              newLigneErrors[ligneIndex] = {};
+            }
+            newLigneErrors[ligneIndex][fieldName] = error.message;
+          }
+        } else {
+          // Erreurs des champs principaux
+          newErrors[path] = error.message;
+        }
+      });
+
+      setErrors(newErrors);
+      setLigneErrors(newLigneErrors);
+      
+      toast.error("Erreur de validation", {
+        description: "Veuillez corriger les erreurs dans le formulaire",
+      });
+      return;
+    }
+
+    // Effacer les erreurs si la validation réussit
+    setErrors({});
+    setLigneErrors({});
+
+    try {
+      onSubmit(submitData);
+      toast.success(initialData ? "Commande modifiée" : "Commande créée");
+    } catch (error) {
+      toast.error("Erreur lors de la soumission");
+    }
   };
 
   return (
@@ -111,8 +217,11 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
                 type="datetime-local"
                 value={formData.dateCommande}
                 onChange={handleChange}
-                required
+                className={errors.dateCommande ? "border-red-500" : ""}
               />
+              {errors.dateCommande && (
+                <p className="text-sm text-red-500">{errors.dateCommande}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="statut">Statut *</Label>
@@ -120,7 +229,7 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
                 value={formData.statut}
                 onValueChange={(value) => handleSelectChange("statut", value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className={errors.statut ? "border-red-500" : ""}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -130,6 +239,9 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
                   <SelectItem value="ANNULEE">Annulée</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.statut && (
+                <p className="text-sm text-red-500">{errors.statut}</p>
+              )}
             </div>
           </div>
 
@@ -140,9 +252,12 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
               name="adresseLivraison"
               value={formData.adresseLivraison}
               onChange={handleChange}
-              required
               placeholder="Adresse complète de livraison"
+              className={errors.adresseLivraison ? "border-red-500" : ""}
             />
+            {errors.adresseLivraison && (
+              <p className="text-sm text-red-500">{errors.adresseLivraison}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -153,40 +268,59 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
               type="number"
               value={formData.clientId}
               onChange={handleChange}
-              required
               placeholder="ID du client"
               min="1"
+              className={errors.clientId ? "border-red-500" : ""}
             />
+            {errors.clientId && (
+              <p className="text-sm text-red-500">{errors.clientId}</p>
+            )}
           </div>
 
           <div className="space-y-4">
-            <Label>Lignes de commande</Label>
+            <Label>Lignes de commande *</Label>
             
             <div className="grid grid-cols-3 gap-2">
               <Input
-                placeholder="ID Produit"
+                placeholder="ID Produit *"
                 value={newLigne.produitId}
                 onChange={(e) => setNewLigne(prev => ({ ...prev, produitId: e.target.value }))}
               />
               <Input
                 type="number"
-                placeholder="Quantité"
+                placeholder="Quantité *"
                 min="1"
                 value={newLigne.quantite}
-                onChange={(e) => setNewLigne(prev => ({ ...prev, quantite: parseInt(e.target.value) || 1 }))}
+                onChange={(e) => setNewLigne(prev => ({ 
+                  ...prev, 
+                  quantite: Math.max(1, parseInt(e.target.value) || 1) 
+                }))}
               />
               <Button type="button" onClick={addLigne} className="flex items-center gap-1">
                 <Plus className="h-4 w-4" /> Ajouter
               </Button>
             </div>
 
+            {errors.lignes && (
+              <p className="text-sm text-red-500">{errors.lignes}</p>
+            )}
+
             {formData.lignes.length > 0 && (
               <div className="border rounded-md p-4 space-y-2">
                 {formData.lignes.map((ligne, index) => (
                   <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <span className="text-sm">
-                      Produit: {ligne.produitId.slice(0, 8)}... - Quantité: {ligne.quantite}
-                    </span>
+                    <div className="flex-1">
+                      <span className="text-sm block">
+                        Produit: {ligne.produitId} - Quantité: {ligne.quantite}
+                      </span>
+                      {/* Afficher les erreurs spécifiques à cette ligne */}
+                      {ligneErrors[index]?.produitId && (
+                        <p className="text-xs text-red-500">{ligneErrors[index]?.produitId}</p>
+                      )}
+                      {ligneErrors[index]?.quantite && (
+                        <p className="text-xs text-red-500">{ligneErrors[index]?.quantite}</p>
+                      )}
+                    </div>
                     <Button
                       type="button"
                       variant="ghost"

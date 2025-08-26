@@ -52,13 +52,29 @@ export const UserTable: React.FC<UserTableProps> = ({ users, loading }) => {
     pageSize: 5,
   });
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(globalFilter.toLowerCase()) ||
-    user.email.toLowerCase().includes(globalFilter.toLowerCase()) ||
-    user.phone.includes(globalFilter) ||
-    user.permissions.join(", ").toLowerCase().includes(globalFilter.toLowerCase())
-  );
-
+ const filteredUsers = users.filter(user => {
+  try {
+    // Validation des données
+    if (!user || typeof user !== 'object') return false;
+    
+    const name = user.name ? String(user.name) : "";
+    const email = user.email ? String(user.email) : "";
+    const phone = user.phone ? String(user.phone) : "";
+    const permissions = Array.isArray(user.permissions) ? user.permissions : [];
+    
+    const searchTerm = globalFilter.toLowerCase();
+    
+    return (
+      name.toLowerCase().includes(searchTerm) ||
+      email.toLowerCase().includes(searchTerm) ||
+      phone.includes(globalFilter) ||
+      permissions.join(", ").toLowerCase().includes(searchTerm)
+    );
+  } catch (error) {
+    console.error("Erreur lors du filtrage de l'utilisateur:", user, error);
+    return false;
+  }
+});
   const pageCount = Math.ceil(filteredUsers.length / pagination.pageSize);
   const paginatedUsers = filteredUsers.slice(
     pagination.pageIndex * pagination.pageSize,
@@ -174,7 +190,7 @@ export const UserTable: React.FC<UserTableProps> = ({ users, loading }) => {
                       {user.phone}
                     </TableCell>
                     <TableCell className="py-3 px-4 whitespace-nowrap text-gray-600 text-sm italic">
-                      {user.permissions.join(", ")}
+                      {user.permissions ? user.permissions.join(", ") : "Aucune permission"}
                     </TableCell>
                     <TableCell className="py-3 px-4 whitespace-nowrap">
                       <div className="flex gap-2">

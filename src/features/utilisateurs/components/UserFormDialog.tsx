@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { Check } from "lucide-react";
 import { createUser } from "@/hooks/usersHooks";
@@ -16,6 +15,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updatePermissions } from "@/hooks/usersHooks";
+import { toast } from "sonner";
+
 const PERMISSIONS = ["ADMIN", "AGENT_DE_STOCK", "CONFIRMATEUR", "SAV"] as const;
 
 const schema = z.object({
@@ -24,9 +25,16 @@ const schema = z.object({
   phone: z.string().min(1, "Téléphone requis"),
   password: z
     .string()
-    .min(6, "Mot de passe trop court")
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+    .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
+    .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
+    .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre")
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Le mot de passe doit contenir au moins un caractère spécial"
+    )
     .optional()
-    .or(z.literal("")), // permet que le champ soit vide lors d'une édition
+    .or(z.literal("")),
   permissions: z
     .array(z.enum(PERMISSIONS))
     .nonempty("Sélectionnez au moins une permission"),
@@ -46,10 +54,12 @@ type Props = {
   open: boolean;
   onClose: () => void;
   initialData?: User | null;
+  onSuccess?: () => void;
 };
 
-const UserFormDialog = ({ open, onClose, initialData }: Props) => {
+const UserFormDialog = ({ open, onClose, initialData, onSuccess }: Props) => {
   const dispatch = useAppDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -94,19 +104,55 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
   };
 
   const onSubmit = async (data: FormValues) => {
-    console.log("Form submitted", data);
-    if (initialData?.id) {
-      await dispatch(
-        updatePermissions({ id: initialData.id, permissions: data.permissions })
-      );
-    } else {
-      await dispatch(createUser(data));
+    setIsSubmitting(true);
+    try {
+      if (initialData?.id) {
+        await dispatch(
+          updatePermissions({ id: initialData.id, permissions: data.permissions })
+        ).unwrap();
+        toast.success("Permissions mises à jour avec succès !", {
+          description: `Les permissions de ${data.name} ont été modifiées.`,
+        });
+      } else {
+        await dispatch(createUser(data)).unwrap();
+        toast.success("Utilisateur créé avec succès !", {
+          description: `L'utilisateur ${data.name} a été ajouté.`,
+        });
+      }
+      onClose();
+      onSuccess?.();
+    } catch (err: any) {
+      console.error("Erreur lors de la soumission:", err);
+      
+      // Extraction du message d'erreur
+      const errorMessage =
+        err?.payload?.message || // Pour les erreurs rejectWithValue de Redux
+        err?.response?.data?.message ||
+        err?.data?.message ||
+        err?.message ||
+        "Une erreur inconnue est survenue.";
+
+      // Gestion spécifique des erreurs de conflit
+      if (err?.payload?.status === 409 || err?.response?.status === 409 || err?.status === 409) {
+        toast.error("Erreur de conflit", {
+          description: errorMessage,
+        });
+      } else {
+        toast.error(`Erreur lors de ${initialData ? "la modification" : "l'ajout"} de l'utilisateur`, {
+          description: errorMessage,
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        onClose();
+      }
+    }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -258,11 +304,20 @@ const UserFormDialog = ({ open, onClose, initialData }: Props) => {
           )}
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               Annuler
             </Button>
-            <Button type="submit" style={{ background: "#F8A67E" }}>
-              {initialData ? "Mettre à jour" : "Créer"}
+            <Button 
+              type="submit" 
+              style={{ background: "#F8A67E" }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Traitement..." : (initialData ? "Mettre à jour" : "Créer")}
             </Button>
           </div>
         </form>

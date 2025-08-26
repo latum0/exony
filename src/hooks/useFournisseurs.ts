@@ -127,13 +127,13 @@ export const useFournisseurs = (): UseFournisseursReturn => {
     }
   };
 
-  const deleteFournisseur = async (id: string) => {
+  const deleteFournisseur = async (id: number) => {
     setLoading(true);
     setError(null);
     try {
       await api.delete(`/fournisseurs/${id}`);
-      setFournisseurs((prev) => prev.filter((f) => f.id !== id));
-      if (fournisseur?.id === id) {
+      setFournisseurs((prev) => prev.filter((f) => f.idFournisseur !== id));
+      if (fournisseur?.idFournisseur === id) {
         setFournisseur(null);
       }
       setLoading(false);
@@ -163,7 +163,7 @@ export const useFournisseurs = (): UseFournisseursReturn => {
 };
 
 interface Fournisseur {
-  idFournisseur: number;
+   idFournisseur: number; 
   nom: string;
   adresse: string;
   contact: string;

@@ -1,7 +1,7 @@
-
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner"; // ou import toast from "react-hot-toast";
 
 interface DeleteConfirmationModalProps {
   open: boolean;
@@ -16,6 +16,14 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
   onCancel,
   itemName = "cet élément",
 }) => {
+  const handleConfirm = () => {
+    onConfirm();
+    toast.success("Suppression réussie", {
+      description: `${itemName} a été supprimé avec succès.`,
+      duration: 3000,
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onCancel}>
       <DialogContent>
@@ -28,7 +36,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
             <Button variant="outline" onClick={onCancel}>
               Annuler
             </Button>
-            <Button variant="destructive" onClick={onConfirm}>
+            <Button variant="destructive" onClick={handleConfirm}>
               Confirmer
             </Button>
           </div>
