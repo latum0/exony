@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Minus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import api from "@/api/axios";
 
 // Schéma de validation Zod
 const ligneCommandeSchema = z.object({
-  produitId: z.string().min(1, "L'ID du produit est requis"),
+  produitId: z.string().min(1, "Le produit est requis"),
   quantite: z.number().min(1, "La quantité doit être au moins 1"),
 });
 
@@ -20,13 +21,26 @@ const commandeSchema = z.object({
   statut: z.enum(["EN_ATTENTE", "EN_COURS", "LIVREE", "ANNULEE"]),
   adresseLivraison: z.string().min(1, "L'adresse de livraison est requise"),
   clientId: z.number({ 
-    invalid_type_error: "L'ID client doit être un nombre",
-    required_error: "L'ID client est requis"
-  }).min(1, "L'ID client doit être supérieur à 0"),
+    invalid_type_error: "Le client est requis",
+    required_error: "Le client est requis"
+  }).min(1, "Le client est requis"),
   lignes: z.array(ligneCommandeSchema).min(1, "Au moins une ligne de commande est requise"),
 });
 
 type CommandeFormValues = z.infer<typeof commandeSchema>;
+
+interface Client {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+}
+
+interface Produit {
+  id: string;
+  nom: string;
+  prix: number;
+}
 
 interface CommandeFormDialogProps {
   open: boolean;
@@ -51,7 +65,16 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
 
   const [newLigne, setNewLigne] = useState({ produitId: "", quantite: 1 });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [ligneErrors, setLigneErrors] = useState<Record<number, Record<string, string>>>({}); // Nouveau: erreurs par ligne
+  const [ligneErrors, setLigneErrors] = useState<Record<number, Record<string, string>>>({});
+  const [clients, setClients] = useState<Client[]>([]);
+  const [produits, setProduits] = useState<Produit[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      fetchClientsAndProduits();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (initialData) {
@@ -75,8 +98,28 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
       });
     }
     setErrors({});
-    setLigneErrors({}); // Réinitialiser les erreurs de ligne
+    setLigneErrors({});
   }, [initialData, open]);
+
+  const fetchClientsAndProduits = async () => {
+    setLoading(true);
+    try {
+      // Récupérer les clients
+      const clientsResponse = await api.get("/clients");
+      setClients(clientsResponse.data.data || clientsResponse.data);
+
+      // Récupérer les produits
+      const produitsResponse = await api.get("/produits");
+      setProduits(produitsResponse.data.data || produitsResponse.data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des données:", error);
+      toast.error("Erreur de chargement", {
+        description: "Impossible de charger les clients et produits",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -127,7 +170,6 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
       lignes: prev.lignes.filter((_, i) => i !== index),
     }));
     
-    // Supprimer aussi les erreurs associées à cette ligne
     setLigneErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[index];
@@ -138,7 +180,6 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Préparer les données pour la validation
     const submitData = {
       dateCommande: formData.dateCommande,
       statut: formData.statut,
@@ -156,7 +197,6 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
       validationResult.error.errors.forEach(error => {
         const path = error.path.join('.');
         
-        // Gérer les erreurs de lignes spécifiques
         if (path.startsWith('lignes.')) {
           const pathParts = path.split('.');
           const ligneIndex = parseInt(pathParts[1]);
@@ -169,7 +209,6 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
             newLigneErrors[ligneIndex][fieldName] = error.message;
           }
         } else {
-          // Erreurs des champs principaux
           newErrors[path] = error.message;
         }
       });
@@ -183,7 +222,6 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
       return;
     }
 
-    // Effacer les erreurs si la validation réussit
     setErrors({});
     setLigneErrors({});
 
@@ -193,6 +231,15 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
     } catch (error) {
       toast.error("Erreur lors de la soumission");
     }
+  };
+
+  const getClientFullName = (client: Client) => {
+    return `${client.prenom} ${client.nom} (${client.email})`;
+  };
+
+  const getProduitName = (produitId: string) => {
+    const produit = produits.find(p => p.id === produitId);
+    return produit ? `${produit.nom} - ${produit.prix}€` : `Produit ${produitId}`;
   };
 
   return (
@@ -207,144 +254,178 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
             {initialData ? "Modifier la commande" : "Créer une nouvelle commande"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <p>Chargement des données...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dateCommande">Date de commande *</Label>
+                <Input
+                  id="dateCommande"
+                  name="dateCommande"
+                  type="datetime-local"
+                  value={formData.dateCommande}
+                  onChange={handleChange}
+                  className={errors.dateCommande ? "border-red-500" : ""}
+                />
+                {errors.dateCommande && (
+                  <p className="text-sm text-red-500">{errors.dateCommande}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="statut">Statut *</Label>
+                <Select
+                  value={formData.statut}
+                  onValueChange={(value) => handleSelectChange("statut", value)}
+                >
+                  <SelectTrigger className={errors.statut ? "border-red-500" : ""}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="EN_ATTENTE">En attente</SelectItem>
+                    <SelectItem value="EN_COURS">En cours</SelectItem>
+                    <SelectItem value="LIVREE">Livrée</SelectItem>
+                    <SelectItem value="ANNULEE">Annulée</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.statut && (
+                  <p className="text-sm text-red-500">{errors.statut}</p>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="dateCommande">Date de commande *</Label>
+              <Label htmlFor="adresseLivraison">Adresse de livraison *</Label>
               <Input
-                id="dateCommande"
-                name="dateCommande"
-                type="datetime-local"
-                value={formData.dateCommande}
+                id="adresseLivraison"
+                name="adresseLivraison"
+                value={formData.adresseLivraison}
                 onChange={handleChange}
-                className={errors.dateCommande ? "border-red-500" : ""}
+                placeholder="Adresse complète de livraison"
+                className={errors.adresseLivraison ? "border-red-500" : ""}
               />
-              {errors.dateCommande && (
-                <p className="text-sm text-red-500">{errors.dateCommande}</p>
+              {errors.adresseLivraison && (
+                <p className="text-sm text-red-500">{errors.adresseLivraison}</p>
               )}
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="statut">Statut *</Label>
+              <Label htmlFor="clientId">Client *</Label>
               <Select
-                value={formData.statut}
-                onValueChange={(value) => handleSelectChange("statut", value)}
+                value={formData.clientId}
+                onValueChange={(value) => handleSelectChange("clientId", value)}
               >
-                <SelectTrigger className={errors.statut ? "border-red-500" : ""}>
-                  <SelectValue />
+                <SelectTrigger className={errors.clientId ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Sélectionner un client" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="EN_ATTENTE">En attente</SelectItem>
-                  <SelectItem value="EN_COURS">En cours</SelectItem>
-                  <SelectItem value="LIVREE">Livrée</SelectItem>
-                  <SelectItem value="ANNULEE">Annulée</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client?.id} value={client?.id?.toString()}>
+                      {getClientFullName(client)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              {errors.statut && (
-                <p className="text-sm text-red-500">{errors.statut}</p>
+              {errors.clientId && (
+                <p className="text-sm text-red-500">{errors.clientId}</p>
               )}
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="adresseLivraison">Adresse de livraison *</Label>
-            <Input
-              id="adresseLivraison"
-              name="adresseLivraison"
-              value={formData.adresseLivraison}
-              onChange={handleChange}
-              placeholder="Adresse complète de livraison"
-              className={errors.adresseLivraison ? "border-red-500" : ""}
-            />
-            {errors.adresseLivraison && (
-              <p className="text-sm text-red-500">{errors.adresseLivraison}</p>
-            )}
-          </div>
+            <div className="space-y-4">
+              <Label>Lignes de commande *</Label>
+              
+             <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                <div className="sm:col-span-3">
+                  <Select
+                    value={newLigne.produitId}
+                    onValueChange={(value) => setNewLigne(prev => ({ ...prev, produitId: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un produit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {produits.map((produit) => (
+                        <SelectItem key={produit.id} value={produit.id}>
+                          {produit.nom} - {produit.prix}€
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="sm:col-span-1">
+                  <Input
+                    type="number"
+                    placeholder="Quantité *"
+                    min="1"
+                    value={newLigne.quantite}
+                    onChange={(e) => setNewLigne(prev => ({ 
+                      ...prev, 
+                      quantite: Math.max(1, parseInt(e.target.value) || 1) 
+                    }))}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="sm:col-span-1">
+                  <Button 
+                    type="button" 
+                    onClick={addLigne} 
+                    className="flex items-center gap-1 w-full justify-center"
+                  >
+                    <Plus className="h-4 w-4" /> Ajouter
+                  </Button>
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="clientId">ID Client *</Label>
-            <Input
-              id="clientId"
-              name="clientId"
-              type="number"
-              value={formData.clientId}
-              onChange={handleChange}
-              placeholder="ID du client"
-              min="1"
-              className={errors.clientId ? "border-red-500" : ""}
-            />
-            {errors.clientId && (
-              <p className="text-sm text-red-500">{errors.clientId}</p>
-            )}
-          </div>
+              {errors.lignes && (
+                <p className="text-sm text-red-500">{errors.lignes}</p>
+              )}
 
-          <div className="space-y-4">
-            <Label>Lignes de commande *</Label>
-            
-            <div className="grid grid-cols-3 gap-2">
-              <Input
-                placeholder="ID Produit *"
-                value={newLigne.produitId}
-                onChange={(e) => setNewLigne(prev => ({ ...prev, produitId: e.target.value }))}
-              />
-              <Input
-                type="number"
-                placeholder="Quantité *"
-                min="1"
-                value={newLigne.quantite}
-                onChange={(e) => setNewLigne(prev => ({ 
-                  ...prev, 
-                  quantite: Math.max(1, parseInt(e.target.value) || 1) 
-                }))}
-              />
-              <Button type="button" onClick={addLigne} className="flex items-center gap-1">
-                <Plus className="h-4 w-4" /> Ajouter
-              </Button>
+              {formData.lignes.length > 0 && (
+                <div className="border rounded-md p-4 space-y-2">
+                  {formData.lignes.map((ligne, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div className="flex-1">
+                        <span className="text-sm block">
+                          Produit: {getProduitName(ligne.produitId)} - Quantité: {ligne.quantite}
+                        </span>
+                        {ligneErrors[index]?.produitId && (
+                          <p className="text-xs text-red-500">{ligneErrors[index]?.produitId}</p>
+                        )}
+                        {ligneErrors[index]?.quantite && (
+                          <p className="text-xs text-red-500">{ligneErrors[index]?.quantite}</p>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeLigne(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {errors.lignes && (
-              <p className="text-sm text-red-500">{errors.lignes}</p>
-            )}
-
-            {formData.lignes.length > 0 && (
-              <div className="border rounded-md p-4 space-y-2">
-                {formData.lignes.map((ligne, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <div className="flex-1">
-                      <span className="text-sm block">
-                        Produit: {ligne.produitId} - Quantité: {ligne.quantite}
-                      </span>
-                      {/* Afficher les erreurs spécifiques à cette ligne */}
-                      {ligneErrors[index]?.produitId && (
-                        <p className="text-xs text-red-500">{ligneErrors[index]?.produitId}</p>
-                      )}
-                      {ligneErrors[index]?.quantite && (
-                        <p className="text-xs text-red-500">{ligneErrors[index]?.quantite}</p>
-                      )}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeLigne(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" type="button" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="submit" style={{ background: "#F8A67E" }}>
-              {initialData ? "Enregistrer les modifications" : "Créer la commande"}
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" type="button" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button type="submit" style={{ background: "#F8A67E" }}>
+                {initialData ? "Enregistrer les modifications" : "Créer la commande"}
+              </Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
