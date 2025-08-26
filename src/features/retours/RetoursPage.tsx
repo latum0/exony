@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircleIcon, CogIcon, PencilIcon, TrashIcon, Eye } from "lucide-react";
+import { PlusCircleIcon, CogIcon, PencilIcon, TrashIcon, Eye, Undo2 } from "lucide-react";
 import { useRetour } from "@/hooks/useRetour";
 import {
   Table,
@@ -141,7 +141,7 @@ export const RetoursPage = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold gap-x-2 flex items-center text-[#F8A67E]">
-          <CogIcon size={28} /> Gestion des retours
+          <Undo2 size={28} /> Gestion des retours
         </h2>
         <Button
           onClick={() => {

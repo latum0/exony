@@ -1,13 +1,11 @@
-// UserDetailsModal.tsx
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { User, Mail, Phone, Shield, Hash } from "lucide-react";
 
 interface User {
   id: number;
@@ -32,22 +30,62 @@ export default function UserDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Détails de l'utilisateur</DialogTitle>
-          <DialogDescription>Voici les informations complètes de l'utilisateur.</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2">
-          <p><strong>Nom :</strong> {user.name}</p>
-          <p><strong>Email :</strong> {user.email}</p>
-          <p><strong>Téléphone :</strong> {user.phone}</p>
-          <p><strong>Permissions :</strong> {user.permissions.join(", ")}</p>
-        </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+           
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <User className="h-4 w-4" />
+                <span>Nom</span>
+              </div>
+              <p className="text-base font-medium">{user.name}</p>
+            </div>
+          </div>
 
-        <DialogFooter>
-          <Button onClick={onClose} style={{ background: "#F8A67E" }}>Fermer</Button>
-        </DialogFooter>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Mail className="h-4 w-4" />
+              <span>Email</span>
+            </div>
+            <p className="text-base">{user.email}</p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Phone className="h-4 w-4" />
+              <span>Téléphone</span>
+            </div>
+            <p className="text-base">{user.phone}</p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Shield className="h-4 w-4" />
+              <span>Permissions</span>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-md">
+              <div className="flex flex-wrap gap-2">
+                {user.permissions.map((permission, index) => (
+                  <span 
+                    key={index} 
+                    className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                  >
+                    {permission}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <Button onClick={onClose}>Fermer</Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -36,7 +36,7 @@ export const HistoriqueDetailsModal: React.FC<HistoriqueDetailsModalProps> = ({
           <DialogTitle>Détails de l'historique</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Calendar className="h-4 w-4" />
@@ -51,7 +51,7 @@ export const HistoriqueDetailsModal: React.FC<HistoriqueDetailsModalProps> = ({
               </div>
               <p className="text-base font-medium">{historique.utilisateurId}</p>
             </div>
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-gray-500">

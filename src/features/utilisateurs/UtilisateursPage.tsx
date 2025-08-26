@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 
 import { Button } from "@/components/ui/button";
-import { CogIcon, PlusCircleIcon, PlusIcon } from "lucide-react";
+import { CogIcon, PlusCircleIcon, PlusIcon, UsersIcon } from "lucide-react";
 import { UserTable } from "./components/UserTable";
 import UserFormDialog from "./components/UserFormDialog";
 
@@ -19,7 +19,7 @@ export const UsersPage = () => {
     <div className="p-6 ">
       <div className="flex justify-between items-center mb-4 ">
         <h2 className="text-[27px]  font-bold gap-x-2  flex items-center text-[#F8A67E]">
-          <CogIcon size={28} /> Gestion des utilisateurs
+          <UsersIcon size={28} /> Gestion des utilisateurs
         </h2>
         <Button
           onClick={() => setDialogOpen(true)}

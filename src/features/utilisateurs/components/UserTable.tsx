@@ -181,7 +181,7 @@ export const UserTable: React.FC<UserTableProps> = ({ users, loading }) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
+                                                      className="text-green-600 hover:text-green-600/90 "
                           onClick={() => handleEdit(user)}
                         >
                           <PencilIcon className="h-4 w-4" />
@@ -189,7 +189,7 @@ export const UserTable: React.FC<UserTableProps> = ({ users, loading }) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
+                           className="text-[#2c97f5]  hover:text-[#2c97f5]"
                           onClick={() => handleViewDetails(user.id)}
                         >
                           <Eye className="h-4 w-4" />
@@ -197,7 +197,7 @@ export const UserTable: React.FC<UserTableProps> = ({ users, loading }) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-red-500 border-red-500 hover:bg-red-500/10"
+                         className="text-red-500  hover:text-red-500"
                           onClick={() => handleDeleteClick(user)}
                         >
                           <TrashIcon className="h-4 w-4" />

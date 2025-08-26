@@ -6,6 +6,7 @@ import {
   PencilIcon,
   TrashIcon,
   Eye,
+  FactoryIcon,
 } from "lucide-react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import {
@@ -141,7 +142,7 @@ export const FournisseursPage = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-[27px]  font-bold gap-x-2 flex items-center text-[#F8A67E]">
-          <CogIcon size={28} /> Gestion des fournisseurs
+          <FactoryIcon size={28} /> Gestion des fournisseurs
         </h2>
         <Button
           onClick={() => {
@@ -246,7 +247,7 @@ export const FournisseursPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
+                            className="text-green-600 hover:text-green-600/90 "
                             onClick={() => handleEdit(f)}
                           >
                             <PencilIcon className="h-4 w-4" />
@@ -254,7 +255,7 @@ export const FournisseursPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
+                            className="text-[#2c97f5]  hover:text-[#2c97f5]"
                             onClick={() => handleViewDetails(f.idFournisseur)}
                           >
                             <Eye className="h-4 w-4" />
@@ -262,7 +263,7 @@ export const FournisseursPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-red-500 border-red-500 hover:bg-red-500/10"
+                            className="text-red-500  hover:text-red-500"
                             onClick={() => handleDeleteClick(f)}
                           >
                             <TrashIcon className="h-4 w-4" />

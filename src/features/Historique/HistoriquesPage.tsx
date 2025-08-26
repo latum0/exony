@@ -324,7 +324,7 @@ export const HistoriquesPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
+                            className="text-[#2c97f5]  hover:text-[#2c97f5]"
                             onClick={() => handleViewDetails(h.idHistorique)}
                           >
                             <Eye className="h-4 w-4" />
@@ -332,7 +332,7 @@ export const HistoriquesPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-red-500 border-red-500 hover:bg-red-500/10"
+                            className="text-red-500  hover:text-red-500"
                             onClick={() => handleDeleteClick(h)}
                           >
                             <TrashIcon className="h-4 w-4" />
