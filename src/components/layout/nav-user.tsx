@@ -1,7 +1,6 @@
 "use client";
 
 import { LogOutIcon, UserCircleIcon } from "lucide-react";
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,6 +15,7 @@ import {
 import { useState } from "react";
 import { AccountModal } from "./Account";
 import { Badge } from "../ui/badge";
+import api from "@/api/axios";
 
 export function NavUserHeader({
   user,
@@ -23,6 +23,17 @@ export function NavUserHeader({
   user: { name: string; role: string; email: string };
 }) {
   const [open, setOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch (err) {
+      console.error("Erreur logout", err);
+    } finally {
+      localStorage.removeItem("accessToken");
+      window.location.href = "/";
+    }
+  };
 
   return (
     <>
@@ -61,7 +72,7 @@ export function NavUserHeader({
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout}>
             <LogOutIcon className="size-4 mr-2" /> Déconnexion
           </DropdownMenuItem>
         </DropdownMenuContent>

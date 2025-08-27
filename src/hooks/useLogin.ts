@@ -19,25 +19,25 @@ export default function useLogin() {
 
       // Stockage dans localStorage
       localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      // localStorage.setItem("refreshToken", refreshToken);
 
-      // Mise à jour du state Redux AVANT la navigation
-      dispatch(setTokens({ 
-        accessToken, 
-        refreshToken,
-        user 
-      }));
+      dispatch(
+        setTokens({
+          accessToken,
+          refreshToken,
+          user,
+        })
+      );
 
-      // Navigation après la mise à jour du state
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Login failed", error.response?.data || error.message);
-      
+
       let errorMessage = "Échec de la connexion. Vérifiez vos identifiants.";
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-      
+
       throw new Error(errorMessage);
     }
   };

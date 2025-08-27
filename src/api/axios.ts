@@ -18,12 +18,12 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Si 401, tente un refresh automatique
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
+    // Premier 401 → tentative de refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
@@ -37,16 +37,25 @@ api.interceptors.response.use(
 
         const newAccessToken = refreshResponse.data.accessToken;
 
-        // Met à jour le token dans localStorage
+        // Stocker le nouveau token
         localStorage.setItem("accessToken", newAccessToken);
 
-        // Met à jour le header pour relancer la requête
+        // Relancer la requête avec le nouveau token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        console.error("Erreur de refresh token", refreshError);
+        console.error("Erreur refresh token → redirection");
+        // 🔴 Ici : refresh échoué → logout & redirect
+        localStorage.removeItem("accessToken");
+        window.location.href = "/"; // redirige à la page login
         return Promise.reject(refreshError);
       }
+    }
+
+    // Si c'est un 401 après un refresh déjà tenté → logout direct
+    if (error.response?.status === 401 && originalRequest._retry) {
+      localStorage.removeItem("accessToken");
+      window.location.href = "/";
     }
 
     return Promise.reject(error);
