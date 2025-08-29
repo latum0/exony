@@ -19,6 +19,7 @@ import HistoriquesPage from "@/features/Historique/HistoriquesPage";
 import AjouterProduitPage from "@/features/Produits/ajouter/page";
 import ProduitDetailPage from "@/features/Produits/[id]/detailsPage";
 import ModifierProduitPage from "@/features/Produits/[id]/modifier/editPage";
+import VerifyEmail from "@/features/auth/VerifyEmail";
 
 
 export function AppRoutes() {
@@ -28,7 +29,7 @@ export function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-
+<Route path="/verify-email" element={<VerifyEmail />} />
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<DashboardLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
