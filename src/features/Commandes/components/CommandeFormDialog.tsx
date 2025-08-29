@@ -40,6 +40,7 @@ interface Produit {
   id: string;
   nom: string;
   prix: number;
+  quantite: number;
 }
 
 interface CommandeFormDialogProps {
@@ -139,6 +140,17 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
   };
 
   const addLigne = () => {
+    // Trouver le produit sélectionné
+    const produitSelectionne = produits.find(p => p.id === newLigne.produitId);
+    
+    // Vérifier si la quantité demandée est disponible
+    if (produitSelectionne && newLigne.quantite > produitSelectionne.quantite) {
+      toast.error("Stock insuffisant", {
+        description: `Quantité demandée (${newLigne.quantite}) supérieure au stock disponible (${produitSelectionne.quantite})`,
+      });
+      return;
+    }
+
     const ligneValidation = ligneCommandeSchema.safeParse({
       produitId: newLigne.produitId,
       quantite: newLigne.quantite,
@@ -242,6 +254,28 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
     return produit ? `${produit.nom} - ${produit.prix}€` : `Produit ${produitId}`;
   };
 
+  // Fonction pour obtenir le stock disponible d'un produit
+  const getStockDisponible = (produitId: string) => {
+    const produit = produits.find(p => p.id === produitId);
+    return produit ? produit.quantite : 0;
+  };
+
+  // Fonction pour gérer le changement de quantité
+  const handleQuantiteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nouvelleQuantite = parseInt(e.target.value) || 1;
+    const stockMax = newLigne.produitId ? getStockDisponible(newLigne.produitId) : 0;
+    
+    // Si le produit est sélectionné, limiter à la quantité disponible
+    const quantiteFinale = newLigne.produitId 
+      ? Math.min(Math.max(1, nouvelleQuantite), stockMax)
+      : Math.max(1, nouvelleQuantite);
+    
+    setNewLigne(prev => ({ 
+      ...prev, 
+      quantite: quantiteFinale
+    }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       if (!isOpen) {
@@ -338,21 +372,37 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
             <div className="space-y-4">
               <Label>Lignes de commande *</Label>
               
-             <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
                 <div className="sm:col-span-3">
                   <Select
                     value={newLigne.produitId}
-                    onValueChange={(value) => setNewLigne(prev => ({ ...prev, produitId: value }))}
+                    onValueChange={(value) => {
+                      const produit = produits.find(p => p.id === value);
+                      setNewLigne(prev => ({ 
+                        ...prev, 
+                        produitId: value,
+                        // Réinitialiser la quantité à 1 ou au maximum disponible
+                        quantite: 1
+                      }));
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner un produit" />
                     </SelectTrigger>
                     <SelectContent>
-                      {produits.map((produit) => (
-                        <SelectItem key={produit.id} value={produit.id}>
-                          {produit.nom} - {produit.prix}€
-                        </SelectItem>
-                      ))}
+                      {produits.map((produit) => {
+                        const estEnStock = produit.quantite > 0;
+                        return (
+                          <SelectItem 
+                            key={produit.id} 
+                            value={produit.id}
+                            disabled={!estEnStock}
+                            className={!estEnStock ? "text-red-500 opacity-50" : ""}
+                          >
+                            {produit.nom} - Stock: {produit.quantite}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -362,13 +412,16 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
                     type="number"
                     placeholder="Quantité *"
                     min="1"
+                    max={newLigne.produitId ? getStockDisponible(newLigne.produitId) : undefined}
                     value={newLigne.quantite}
-                    onChange={(e) => setNewLigne(prev => ({ 
-                      ...prev, 
-                      quantite: Math.max(1, parseInt(e.target.value) || 1) 
-                    }))}
+                    onChange={handleQuantiteChange}
                     className="w-full"
                   />
+                  {newLigne.produitId && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Max: {getStockDisponible(newLigne.produitId)}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="sm:col-span-1">
@@ -376,6 +429,7 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
                     type="button" 
                     onClick={addLigne} 
                     className="flex items-center gap-1 w-full justify-center"
+                    disabled={!newLigne.produitId}
                   >
                     <Plus className="h-4 w-4" /> Ajouter
                   </Button>
@@ -388,30 +442,36 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
 
               {formData.lignes.length > 0 && (
                 <div className="border rounded-md p-4 space-y-2">
-                  {formData.lignes.map((ligne, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <div className="flex-1">
-                        <span className="text-sm block">
-                          Produit: {getProduitName(ligne.produitId)} - Quantité: {ligne.quantite}
-                        </span>
-                        {ligneErrors[index]?.produitId && (
-                          <p className="text-xs text-red-500">{ligneErrors[index]?.produitId}</p>
-                        )}
-                        {ligneErrors[index]?.quantite && (
-                          <p className="text-xs text-red-500">{ligneErrors[index]?.quantite}</p>
-                        )}
+                  {formData.lignes.map((ligne, index) => {
+                    const produit = produits.find(p => p.id === ligne.produitId);
+                    return (
+                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <div className="flex-1">
+                          <span className="text-sm block">
+                            Produit: {produit ? produit.nom : `ID: ${ligne.produitId}`} - 
+                            Quantité: {ligne.quantite} - 
+                            Prix unitaire: {produit ? `${produit.prix}€` : 'N/A'} - 
+                            Total: {produit ? `${(produit.prix * ligne.quantite).toFixed(2)}€` : 'N/A'}
+                          </span>
+                          {ligneErrors[index]?.produitId && (
+                            <p className="text-xs text-red-500">{ligneErrors[index]?.produitId}</p>
+                          )}
+                          {ligneErrors[index]?.quantite && (
+                            <p className="text-xs text-red-500">{ligneErrors[index]?.quantite}</p>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeLigne(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeLigne(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
