@@ -36,13 +36,8 @@ export interface NotificationsResponse {
 
 export default function useNotifications() {
   const dispatch = useDispatch();
-  const { 
-    notifications, 
-    currentNotification, 
-    loading, 
-    error,
-    deleting 
-  } = useSelector((state: RootState) => state.notifications);
+  const { notifications, currentNotification, loading, error, deleting } =
+    useSelector((state: RootState) => state.notifications);
 
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -141,7 +136,7 @@ export default function useNotifications() {
     loading: loading || localLoading,
     error: error || localError,
     deleting,
-    
+
     // Méthodes
     fetchNotifications,
     fetchNotification,

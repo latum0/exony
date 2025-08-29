@@ -1,6 +1,10 @@
-
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Historique } from "@/hooks/useHistorique";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, FileText } from "lucide-react";
@@ -17,15 +21,15 @@ export const HistoriqueDetailsModal: React.FC<HistoriqueDetailsModalProps> = ({
   historique,
 }) => {
   if (!historique) return null;
-
+  console.log(historique);
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     });
   };
 
@@ -58,7 +62,9 @@ export const HistoriqueDetailsModal: React.FC<HistoriqueDetailsModalProps> = ({
               <Calendar className="h-4 w-4" />
               <span>Date de modification</span>
             </div>
-            <p className="text-base">{formatDate(historique.dateModification)}</p>
+            <p className="text-base">
+              {formatDate(historique.dateModification)}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -66,7 +72,9 @@ export const HistoriqueDetailsModal: React.FC<HistoriqueDetailsModalProps> = ({
               <User className="h-4 w-4" />
               <span>Acteur</span>
             </div>
-            <p className="text-base font-medium">{historique.acteur}</p>
+            <p className="text-base font-medium">
+              {historique?.utilisateur?.name}
+            </p>
           </div>
 
           <div className="space-y-2">

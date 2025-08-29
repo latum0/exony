@@ -45,7 +45,9 @@ export function SiteHeader() {
   // Calculer le nombre de notifications non résolues
   useEffect(() => {
     if (notifications.length > 0) {
-      const unresolved = notifications.filter(notif => !notif.resolved).length;
+      const unresolved = notifications.filter(
+        (notif) => !notif.resolved
+      ).length;
       setUnreadCount(unresolved);
     } else {
       setUnreadCount(0);
@@ -92,7 +94,10 @@ export function SiteHeader() {
         <div className="flex items-center justify-end w-full gap-4">
           {/* Bouton de notifications pour les administrateurs */}
           {profile?.role === "ADMIN" && (
-            <DropdownMenu open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+            <DropdownMenu
+              open={isNotificationsOpen}
+              onOpenChange={setIsNotificationsOpen}
+            >
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -117,7 +122,8 @@ export function SiteHeader() {
                 <div className="flex items-center justify-between p-2 border-b">
                   <h3 className="font-semibold">Notifications</h3>
                   <Badge variant="outline">
-                    {notifications.length} {notifications.length > 1 ? 'notifs' : 'notif'}
+                    {notifications.length}{" "}
+                    {notifications.length > 1 ? "notifs" : "notif"}
                   </Badge>
                 </div>
 
@@ -166,13 +172,17 @@ export function SiteHeader() {
 
                         <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
                           <span>
-                            {new Date(notification.createdAt).toLocaleDateString()}
+                            {new Date(
+                              notification.createdAt
+                            ).toLocaleDateString()}
                           </span>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={(e) => handleDeleteNotification(notification.id, e)}
+                            onClick={(e) =>
+                              handleDeleteNotification(notification.id, e)
+                            }
                             disabled={deleting.includes(notification.id)}
                           >
                             {deleting.includes(notification.id) ? (
