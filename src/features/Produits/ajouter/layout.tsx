@@ -14,7 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <SiteHeader />
 
           {/* Outlet = contenu de la page actuelle */}
-          <main className="flex-1 overflow-y-auto pt-14 bg-[#fafafa] ">
+          <main className="flex-1 overflow-y-auto pt-1 bg-[#fafafa] ">
             {children}
           </main>
         </div>
