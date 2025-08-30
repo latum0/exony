@@ -5,8 +5,9 @@ import profileReducer from "./slices/profileSlice";
 import clientsReducer from "./slices/clients-slice";
 import blacklistClientsReducer from "./slices/blacklist-slice";
 import produits from "./slices/produits-slice";
-import passwordReducer from "./slices/passwordSlice"; // Ajoutez cette ligne
-import notificationsReducer from "./slices/notificationsSlice"; // Ajoutez cette ligne
+import passwordReducer from "./slices/passwordSlice";
+import notificationsReducer from "./slices/notificationsSlice";
+import statsReducer from "./slices/statsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,7 +17,8 @@ export const store = configureStore({
     clients: clientsReducer,
     blacklistClients: blacklistClientsReducer,
     password: passwordReducer,
-     notifications: notificationsReducer, 
+    stats: statsReducer,
+    notifications: notificationsReducer,
     produits,
   },
 });

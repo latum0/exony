@@ -1,6 +1,9 @@
 import {
-  Card, CardHeader, CardTitle, CardDescription,
-  CardContent, CardFooter,
+  Card,
+  CardHeader,
+  CardDescription,
+  CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import LoginForm from "@/components/auth/LoginForm";
 import useLogin from "@/hooks/useLogin";
@@ -20,8 +23,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative w-screen h-screen bg-gray-50 flex items-center justify-center overflow-hidden">
-     
-    {/* Logos flottants */}
+      {/* Logos flottants */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         {[...Array(6)].map((_, i) => (
           <img
@@ -77,6 +79,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-
-

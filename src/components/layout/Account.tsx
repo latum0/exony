@@ -11,7 +11,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Phone, Shield, Settings, Key, Eye, EyeOff } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  Shield,
+  Settings,
+  Key,
+  Eye,
+  EyeOff,
+  KeyRound,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
@@ -23,12 +33,18 @@ export function AccountModal({
   onClose: () => void;
 }) {
   const { loading, error, profile } = useProfile();
-  const { changePassword, isLoading: isChangingPassword, error: passwordError, isSuccess: passwordSuccess, resetState } = useChangePassword();
+  const {
+    changePassword,
+    isLoading: isChangingPassword,
+    error: passwordError,
+    isSuccess: passwordSuccess,
+    resetState,
+  } = useChangePassword();
   const [tab, setTab] = useState("view");
   const [showPasswords, setShowPasswords] = useState({
     oldPassword: false,
     newPassword: false,
-    confirmPassword: false
+    confirmPassword: false,
   });
 
   const [formData, setFormData] = useState({
@@ -63,7 +79,7 @@ export function AccountModal({
       });
       resetState();
     }
-    
+
     if (passwordError) {
       toast.error(passwordError);
     }
@@ -75,7 +91,7 @@ export function AccountModal({
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    
+
     // Réinitialiser les erreurs quand l'utilisateur modifie le formulaire
     if (passwordError) {
       resetState();
@@ -83,9 +99,9 @@ export function AccountModal({
   };
 
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
-    setShowPasswords(prev => ({
+    setShowPasswords((prev) => ({
       ...prev,
-      [field]: !prev[field]
+      [field]: !prev[field],
     }));
   };
 
@@ -96,7 +112,7 @@ export function AccountModal({
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
       return;
@@ -115,6 +131,11 @@ export function AccountModal({
     } catch (err) {
       // L'erreur est déjà gérée dans le hook et affichée via toast
     }
+  };
+  const permissionColors: Record<string, string> = {
+    AGENT_DE_STOCK: "bg-blue-50 text-blue-700 border border-blue-500",
+    CONFIRMATEUR: "bg-green-50 text-green-700 border border-green-500",
+    SAV: "bg-purple-50 text-purple-700 border border-purple-500",
   };
 
   return (
@@ -193,6 +214,30 @@ export function AccountModal({
                   <Badge variant="secondary">{profile?.role}</Badge>
                 </div>
               </div>
+              <div className="flex items-start gap-2">
+                <KeyRound className="w-4 h-4 text-muted-foreground mt-1" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Permissions</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {profile?.permissions && profile.permissions.length > 0 ? (
+                      profile.permissions.map((perm: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className={`px-2 py-0.5 rounded-md text-xs font-medium ${
+                            permissionColors[perm] || "bg-gray-300 text-black"
+                          }`}
+                        >
+                          {perm}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Aucune permission
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </TabsContent>
 
             {/* Modifier le profil */}
@@ -253,9 +298,13 @@ export function AccountModal({
                       variant="ghost"
                       size="icon"
                       className="absolute right-1 top-1 h-7 w-7"
-                      onClick={() => togglePasswordVisibility('oldPassword')}
+                      onClick={() => togglePasswordVisibility("oldPassword")}
                     >
-                      {showPasswords.oldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showPasswords.oldPassword ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -277,15 +326,21 @@ export function AccountModal({
                       variant="ghost"
                       size="icon"
                       className="absolute right-1 top-1 h-7 w-7"
-                      onClick={() => togglePasswordVisibility('newPassword')}
+                      onClick={() => togglePasswordVisibility("newPassword")}
                     >
-                      {showPasswords.newPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showPasswords.newPassword ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
                     </Button>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                  <Label htmlFor="confirmPassword">
+                    Confirmer le mot de passe
+                  </Label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
@@ -301,9 +356,15 @@ export function AccountModal({
                       variant="ghost"
                       size="icon"
                       className="absolute right-1 top-1 h-7 w-7"
-                      onClick={() => togglePasswordVisibility('confirmPassword')}
+                      onClick={() =>
+                        togglePasswordVisibility("confirmPassword")
+                      }
                     >
-                      {showPasswords.confirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showPasswords.confirmPassword ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -313,7 +374,9 @@ export function AccountModal({
                   disabled={isChangingPassword}
                   className="w-full mt-4 bg-gradient-to-r to-[#f7b154] from-[#F8A67E] text-white shadow-md hover:opacity-90 disabled:opacity-50"
                 >
-                  {isChangingPassword ? "Changement en cours..." : "Changer le mot de passe"}
+                  {isChangingPassword
+                    ? "Changement en cours..."
+                    : "Changer le mot de passe"}
                 </Button>
               </form>
             </TabsContent>

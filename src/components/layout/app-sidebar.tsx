@@ -25,6 +25,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 const data = {
   navMain: [
@@ -39,8 +41,35 @@ const data = {
     { title: "historiques", url: "/historique", icon: History },
   ],
 };
+const permissionAccess: Record<string, string[]> = {
+  AGENT_DE_STOCK: ["/produits", "/fournisseurs", "/retours"],
+  CONFIRMATEUR: ["/commandes", "/client"],
+  SAV: ["/retours", "/client", "/liste-noire"],
+};
+function getAccessibleNav(role: string, permissions: string[] | null) {
+  if (role === "ADMIN") {
+    return data.navMain;
+  }
+
+  if (role === "MANAGER" && permissions) {
+ 
+    const allowedUrls = new Set(
+      permissions.flatMap((p) => permissionAccess[p] || [])
+    );
+
+    return data.navMain.filter((item) => allowedUrls.has(item.url));
+  }
+
+  return []; 
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const profile = useSelector((state: RootState) => state.profile.data);
+
+  const navItems = profile
+    ? getAccessibleNav(profile.role, profile.permissions)
+    : [];
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -56,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   alt="Logo Exony"
                   className="h-13 w-13 mt-2"
                 />
-                <span className="text-2xl text-[#F8A67E]  mt-2 font-semibold font-poppins">
+                <span className="text-2xl text-[#F8A67E] mt-2 font-semibold font-poppins">
                   Exony
                 </span>
               </Link>
@@ -64,12 +93,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="mt-4">
-        <NavMain items={data.navMain} />
 
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+      <SidebarContent className="mt-4">
+        <NavMain items={navItems} />
       </SidebarContent>
-      <SidebarFooter></SidebarFooter>
+
+      <SidebarFooter />
     </Sidebar>
   );
 }

@@ -7,6 +7,7 @@ import {
   MoreHorizontal,
   Trash2Icon,
   Eye,
+  Copy,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { API_BASE_URL } from "@/constants/config";
 import { QRCodeCell } from "./QRCodeCell";
 import { Badge } from "../ui/badge";
 import type { Fournisseur } from "@/features/Produits/ajouter/page";
+import { toast } from "sonner";
 
 export interface Produit {
   fournisseurs: Fournisseur;
@@ -236,7 +238,24 @@ export const getProduitColumns = ({
                   Modifier
                 </span>
               </DropdownMenuItem>
-
+              <DropdownMenuItem
+                onClick={() => {
+                  navigator.clipboard.writeText(produit.idProduit);
+                  toast.success(
+                    "L'ID du produit a été copié dans le presse-papiers."
+                  );
+                }}
+                className="text-orange-600 hover:text-orange-600/90 cursor-pointer"
+              >
+                <Copy
+                  size={14}
+                  className="mr-2 text-orange-600 hover:text-orange-600/90"
+                />
+                <span className="text-orange-600 hover:text-orange-600/90">
+                  {" "}
+                  Copier ID
+                </span>
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
                   onDelete(produit.idProduit);

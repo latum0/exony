@@ -21,7 +21,6 @@ import ProduitDetailPage from "@/features/Produits/[id]/detailsPage";
 import ModifierProduitPage from "@/features/Produits/[id]/modifier/editPage";
 import VerifyEmail from "@/features/auth/VerifyEmail";
 
-
 export function AppRoutes() {
   return (
     <Routes>
@@ -29,7 +28,7 @@ export function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-<Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<DashboardLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
@@ -39,9 +38,8 @@ export function AppRoutes() {
           <Route path="liste-noire" element={<ListeNoirePage />} />
           <Route path="client" element={<Clients />} />
 
-           <Route path="Retours" element={<RetoursPage />} />
-        <Route path="historique" element={<HistoriquesPage />} />
-
+          <Route path="Retours" element={<RetoursPage />} />
+          <Route path="historique" element={<HistoriquesPage />} />
 
           <Route path="produits" element={<Produits />} />
           <Route path="/produits/ajouter" element={<AjouterProduitPage />} />
@@ -51,7 +49,6 @@ export function AppRoutes() {
             path="/produits/:id/modifier"
             element={<ModifierProduitPage />}
           />
-
         </Route>
       </Route>
     </Routes>

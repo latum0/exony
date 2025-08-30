@@ -15,21 +15,38 @@ export default function useLogin() {
         password: formData.password,
       });
 
-      const { accessToken, refreshToken, user } = response.data;
+      const { accessToken } = response.data;
 
-      // Stockage dans localStorage
       localStorage.setItem("accessToken", accessToken);
-      // localStorage.setItem("refreshToken", refreshToken);
 
-      dispatch(
-        setTokens({
-          accessToken,
-          refreshToken,
-          user,
-        })
-      );
+      dispatch(setTokens({ accessToken }));
 
-      navigate("/dashboard");
+      const profileRes = await api.get("/auth/profile", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const profile = profileRes.data.data;
+
+      let redirectPath = "/dashboard";
+
+      if (profile.role === "ADMIN") {
+        redirectPath = "/dashboard";
+      } else if (
+        profile.role === "MANAGER" &&
+        Array.isArray(profile.permissions)
+      ) {
+        if (profile.permissions.includes("AGENT_DE_STOCK")) {
+          redirectPath = "/fournisseurs";
+        } else if (profile.permissions.includes("CONFIRMATEUR")) {
+          redirectPath = "/commandes";
+        } else if (profile.permissions.includes("SAV")) {
+          redirectPath = "/client";
+        }
+      }
+
+      navigate(redirectPath);
     } catch (error: any) {
       console.error("Login failed", error.response?.data || error.message);
 

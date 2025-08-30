@@ -34,6 +34,7 @@ const profileSlice = createSlice({
     fetchProfileSuccess(state, action: PayloadAction<Profile>) {
       state.loading = false;
       state.data = action.payload;
+      console.log(state.data);
     },
     fetchProfileFailure(state, action: PayloadAction<string>) {
       state.loading = false;
