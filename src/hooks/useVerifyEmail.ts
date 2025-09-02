@@ -17,9 +17,8 @@ export default function useVerifyEmail() {
     try {
       setState({ status: 'loading', message: 'Vérification en cours...' });
 
-      const response = await api.post("/auth/verify-email", { 
-        token: verificationToken 
-      });
+      // CORRECTION : Utiliser GET avec token en paramètre query
+      const response = await api.get(`/auth/verify-email?token=${encodeURIComponent(verificationToken)}`);
 
       if (response.status >= 200 && response.status < 300) {
         setState({

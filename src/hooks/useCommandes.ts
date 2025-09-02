@@ -123,69 +123,69 @@ export const useCommandes = (): UseCommandesReturn => {
     }
   };
 
-  const getCommande = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get<CommandeResponseDto>(`/commandes/${id}`);
-      setCommande(response.data);
-      setLoading(false);
-    } catch (error) {
-      handleApiError(error);
-    }
-  };
+ const getCommande = async (id: string) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.get<{ data: CommandeResponseDto }>(`/commandes/${id}`);
+    setCommande(response.data.data); // Accéder à response.data.data
+    setLoading(false);
+  } catch (error) {
+    handleApiError(error);
+  }
+};
 
-  const createCommande = async (data: CreateCommandeDto) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.post<CommandeResponseDto>("/commandes", data);
-      setCommandes((prev) => [...prev, response.data]);
-      setLoading(false);
-      return response.data;
-    } catch (error) {
-      return handleApiError(error);
-    }
-  };
+const createCommande = async (data: CreateCommandeDto) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.post<{ data: CommandeResponseDto }>("/commandes", data);
+    setCommandes((prev) => [...prev, response.data.data]); // Accéder à response.data.data
+    setLoading(false);
+    return response.data.data; // Retourner response.data.data
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
 
-  const updateCommande = async (id: string, data: UpdateCommandeDto) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.patch<CommandeResponseDto>(`/commandes/${id}`, data);
-      setCommandes((prev) =>
-        prev.map((c) => (c.idCommande === id ? response.data : c))
-      );
-      if (commande?.idCommande === id) {
-        setCommande(response.data);
-      }
-      setLoading(false);
-      return response.data;
-    } catch (error) {
-      return handleApiError(error);
+ const updateCommande = async (id: string, data: UpdateCommandeDto) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.patch<{ data: CommandeResponseDto }>(`/commandes/${id}`, data);
+    setCommandes((prev) =>
+      prev.map((c) => (c.idCommande === id ? response.data.data : c)) // Accéder à response.data.data
+    );
+    if (commande?.idCommande === id) {
+      setCommande(response.data.data); // Accéder à response.data.data
     }
-  };
+    setLoading(false);
+    return response.data.data; // Retourner response.data.data
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
 
   const updateCommandeMontant = async (id: string, montantTotal: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.patch<CommandeResponseDto>(
-        `/commandes/${id}/montant`,
-        { montantTotal }
-      );
-      setCommandes((prev) =>
-        prev.map((c) => (c.idCommande === id ? response.data : c))
-      );
-      if (commande?.idCommande === id) {
-        setCommande(response.data);
-      }
-      setLoading(false);
-      return response.data;
-    } catch (error) {
-      return handleApiError(error);
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.patch<{ data: CommandeResponseDto }>(
+      `/commandes/${id}/montant`,
+      { montantTotal }
+    );
+    setCommandes((prev) =>
+      prev.map((c) => (c.idCommande === id ? response.data.data : c)) // Accéder à response.data.data
+    );
+    if (commande?.idCommande === id) {
+      setCommande(response.data.data); // Accéder à response.data.data
     }
-  };
+    setLoading(false);
+    return response.data.data; // Retourner response.data.data
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
 
   const deleteCommande = async (id: string) => {
     setLoading(true);

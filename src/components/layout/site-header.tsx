@@ -16,14 +16,15 @@ import { Bell, Eye, Trash2, CheckCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 export function SiteHeader() {
-  const { profile } = useProfile();
+  const { profile, error: profileError } = useProfile();
   const {
     notifications,
     loading,
-    error,
+    error: notificationsError,
     deleting,
     fetchNotifications,
     deleteNotification,
+    markAsResolved
   } = useNotifications();
 
   const [unreadCount, setUnreadCount] = useState(0);
@@ -35,6 +36,14 @@ export function SiteHeader() {
     email: profile?.email || "",
   };
 
+  // Gestion des erreurs
+  useEffect(() => {
+    if (profileError) {
+      console.error("Erreur de profil:", profileError);
+      toast.error("Erreur lors du chargement du profil");
+    }
+  }, [profileError]);
+
   // Charger les notifications quand le dropdown s'ouvre
   useEffect(() => {
     if (isNotificationsOpen && profile?.role === "ADMIN") {
@@ -44,7 +53,7 @@ export function SiteHeader() {
 
   // Calculer le nombre de notifications non résolues
   useEffect(() => {
-    if (notifications.length > 0) {
+    if (notifications && notifications?.length > 0) {
       const unresolved = notifications.filter(
         (notif) => !notif.resolved
       ).length;
@@ -60,7 +69,19 @@ export function SiteHeader() {
       await deleteNotification(id);
       toast.success("Notification supprimée");
     } catch (err) {
-      // L'erreur est déjà gérée dans le hook
+      console.error("Erreur lors de la suppression:", err);
+      toast.error("Échec de la suppression");
+    }
+  };
+
+  const handleMarkAsResolved = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await markAsResolved(id);
+      toast.success("Notification marquée comme résolue");
+    } catch (err) {
+      console.error("Erreur lors du marquage comme résolu:", err);
+      toast.error("Échec de l'opération");
     }
   };
 
@@ -121,21 +142,23 @@ export function SiteHeader() {
               >
                 <div className="flex items-center justify-between p-2 border-b">
                   <h3 className="font-semibold">Notifications</h3>
-                  <Badge variant="outline">
-                    {notifications.length}{" "}
-                    {notifications.length > 1 ? "notifs" : "notif"}
-                  </Badge>
+                  {notifications && (
+                    <Badge variant="outline">
+                      {notifications.length}{" "}
+                      {notifications.length > 1 ? "notifs" : "notif"}
+                    </Badge>
+                  )}
                 </div>
 
                 {loading ? (
                   <div className="p-4 text-center text-sm text-muted-foreground">
                     Chargement des notifications...
                   </div>
-                ) : error ? (
+                ) : notificationsError ? (
                   <div className="p-4 text-center text-sm text-destructive">
-                    Erreur: {error}
+                    Erreur: {notificationsError}
                   </div>
-                ) : notifications.length === 0 ? (
+                ) : !notifications || notifications.length === 0 ? (
                   <div className="p-4 text-center text-sm text-muted-foreground">
                     Aucune notification
                   </div>
@@ -148,6 +171,7 @@ export function SiteHeader() {
                         onClick={() => {
                           // Action quand on clique sur une notification
                           console.log("Voir détails:", notification.id);
+                          // Vous pourriez naviguer vers la page concernée ici
                         }}
                       >
                         <div className="flex items-start justify-between w-full mb-2">
@@ -176,28 +200,42 @@ export function SiteHeader() {
                               notification.createdAt
                             ).toLocaleDateString()}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={(e) =>
-                              handleDeleteNotification(notification.id, e)
-                            }
-                            disabled={deleting.includes(notification.id)}
-                          >
-                            {deleting.includes(notification.id) ? (
-                              <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                            ) : (
-                              <Trash2 className="h-3 w-3" />
+                          <div className="flex gap-1">
+                            {!notification.resolved && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={(e) => handleMarkAsResolved(notification.id, e)}
+                                title="Marquer comme résolu"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                              </Button>
                             )}
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={(e) =>
+                                handleDeleteNotification(notification.id, e)
+                              }
+                              disabled={deleting.includes(notification.id)}
+                              title="Supprimer la notification"
+                            >
+                              {deleting.includes(notification.id) ? (
+                                <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                              ) : (
+                                <Trash2 className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       </DropdownMenuItem>
                     ))}
                   </div>
                 )}
 
-                {notifications.length > 0 && (
+                {notifications && notifications.length > 0 && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -205,6 +243,7 @@ export function SiteHeader() {
                       onClick={() => {
                         // Action pour voir toutes les notifications
                         console.log("Voir toutes les notifications");
+                        // Navigation vers une page dédiée aux notifications
                       }}
                     >
                       Voir toutes les notifications

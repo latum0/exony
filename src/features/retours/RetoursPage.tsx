@@ -84,14 +84,22 @@ export const RetoursPage = () => {
     handleGetRetours();
   };
 
-  const handleUpdateRetour = async (data: RetourInput) => {
-    if (selectedRetour) {
-      await updateRetour(selectedRetour.idRetour, data);
-      setDialogOpen(false);
-      setSelectedRetour(null);
-      handleGetRetours();
-    }
-  };
+ const handleUpdateRetour = async (data: RetourInput) => {
+  if (selectedRetour) {
+    // Créez un objet avec seulement les champs modifiés
+    const updateData: RetourUpdateInput = {
+      dateRetour: data.dateRetour,
+      statutRetour: data.statutRetour,
+      raisonRetour: data.raisonRetour,
+      commandeId: data.commandeId
+    };
+    
+    await updateRetour(selectedRetour.idRetour, updateData);
+    setDialogOpen(false);
+    setSelectedRetour(null);
+    handleGetRetours();
+  }
+};
 
   const handleViewDetails = async (idRetour: number) => {
     try {
@@ -102,10 +110,10 @@ export const RetoursPage = () => {
     }
   };
 
-  const handleDeleteClick = (retour: Retour) => {
-    setRetourToDelete(retour);
-    setDeleteDialogOpen(true);
-  };
+ const handleDeleteClick = (retour: Retour) => {
+  setRetourToDelete(retour);
+  setDeleteDialogOpen(true);
+};
 
   const confirmDelete = async () => {
     if (retourToDelete) {
@@ -115,6 +123,7 @@ export const RetoursPage = () => {
       handleGetRetours();
     }
   };
+
 
   const handleEdit = (retour: Retour) => {
     setSelectedRetour({
@@ -143,16 +152,7 @@ export const RetoursPage = () => {
         <h2 className="text-2xl font-bold gap-x-2 flex items-center text-[#F8A67E]">
           <Undo2 size={28} /> Gestion des retours
         </h2>
-        <Button
-          onClick={() => {
-            setSelectedRetour(null);
-            setDialogOpen(true);
-          }}
-          style={{ background: "#F8A67E", borderRadius: "8px" }}
-        >
-          <PlusCircleIcon className="w-4 h-4 mr-[3px]" />
-          Ajouter
-        </Button>
+       
       </div>
 
       {error && (
@@ -275,14 +275,14 @@ export const RetoursPage = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-500 border-red-500 hover:bg-red-500/10"
-                            onClick={() => handleDeleteClick(r)}
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </Button>
+                        <Button
+  variant="outline"
+  size="sm"
+  className="text-red-500 border-red-500 hover:bg-red-500/10"
+  onClick={() => handleDeleteClick(r)} // Utilisez handleDeleteClick au lieu de handleDeleteClick
+>
+  <TrashIcon className="h-4 w-4" />
+</Button>
                         </div>
                       </TableCell>
                     </TableRow>
