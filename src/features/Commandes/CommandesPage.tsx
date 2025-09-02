@@ -364,7 +364,7 @@ export const CommandesPage = () => {
                         {c.clientId}
                       </TableCell>
                       <TableCell className="py-3 px-4 whitespace-nowrap font-medium">
-                        {parseFloat(c.montantTotal).toFixed(2)} €
+                        {parseFloat(c.montantTotal).toFixed(2)} DA
                       </TableCell>
                       <TableCell className="py-3 px-4 whitespace-nowrap">
                         <div className="flex gap-2">

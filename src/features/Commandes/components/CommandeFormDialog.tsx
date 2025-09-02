@@ -102,25 +102,29 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
     setLigneErrors({});
   }, [initialData, open]);
 
-  const fetchClientsAndProduits = async () => {
-    setLoading(true);
-    try {
-      // Récupérer les clients
-      const clientsResponse = await api.get("/clients");
-      setClients(clientsResponse.data.data || clientsResponse.data);
+ const fetchClientsAndProduits = async () => {
+  setLoading(true);
+  try {
+    // Récupérer les clients
+    const clientsResponse = await api.get("/clients");
+    const clientsData = clientsResponse.data.data || clientsResponse.data;
+    setClients(Array.isArray(clientsData) ? clientsData : []);
 
-      // Récupérer les produits
-      const produitsResponse = await api.get("/produits");
-      setProduits(produitsResponse.data.data || produitsResponse.data);
-    } catch (error) {
-      console.error("Erreur lors du chargement des données:", error);
-      toast.error("Erreur de chargement", {
-        description: "Impossible de charger les clients et produits",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Récupérer les produits
+    const produitsResponse = await api.get("/produits");
+    const produitsData = produitsResponse.data.data || produitsResponse.data;
+    setProduits(Array.isArray(produitsData) ? produitsData : []);
+  } catch (error) {
+    console.error("Erreur lors du chargement des données:", error);
+    toast.error("Erreur de chargement", {
+      description: "Impossible de charger les clients et produits",
+    });
+    setClients([]);
+    setProduits([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -192,13 +196,14 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const submitData = {
-      dateCommande: formData.dateCommande,
-      statut: formData.statut,
-      adresseLivraison: formData.adresseLivraison,
-      clientId: formData.clientId ? parseInt(formData.clientId) : 0,
-      lignes: formData.lignes,
-    };
+   const submitData = {
+    dateCommande: new Date(formData.dateCommande).toISOString(), // Conversion ici
+    statut: formData.statut,
+    adresseLivraison: formData.adresseLivraison,
+    clientId: formData.clientId ? parseInt(formData.clientId) : 0,
+    lignes: formData.lignes,
+  };
+
 
     const validationResult = commandeSchema.safeParse(submitData);
 
@@ -251,7 +256,7 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
 
   const getProduitName = (produitId: string) => {
     const produit = produits.find(p => p.id === produitId);
-    return produit ? `${produit.nom} - ${produit.prix}€` : `Produit ${produitId}`;
+    return produit ? `${produit.nom} - ${produit.prix}DA` : `Produit ${produitId}`;
   };
 
   // Fonction pour obtenir le stock disponible d'un produit
@@ -357,12 +362,12 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
                   <SelectValue placeholder="Sélectionner un client" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client?.id} value={client?.id?.toString()}>
-                      {getClientFullName(client)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+  {clients.map((client) => (
+    <SelectItem key={client.id} value={client.id?.toString()}>
+      {getClientFullName(client)}
+    </SelectItem>
+  ))}
+</SelectContent>
               </Select>
               {errors.clientId && (
                 <p className="text-sm text-red-500">{errors.clientId}</p>
@@ -390,19 +395,11 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
                       <SelectValue placeholder="Sélectionner un produit" />
                     </SelectTrigger>
                     <SelectContent>
-                      {produits.map((produit) => {
-                        const estEnStock = produit.quantite > 0;
-                        return (
-                          <SelectItem 
-                            key={produit.id} 
-                            value={produit.id}
-                            disabled={!estEnStock}
-                            className={!estEnStock ? "text-red-500 opacity-50" : ""}
-                          >
-                            {produit.nom} - Stock: {produit.quantite}
-                          </SelectItem>
-                        );
-                      })}
+                      {produits.map((produit) => (
+                        <SelectItem key={produit.id} value={produit.id}>
+                          {produit.nom} - Stock: {produit.quantite}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -450,8 +447,8 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
                           <span className="text-sm block">
                             Produit: {produit ? produit.nom : `ID: ${ligne.produitId}`} - 
                             Quantité: {ligne.quantite} - 
-                            Prix unitaire: {produit ? `${produit.prix}€` : 'N/A'} - 
-                            Total: {produit ? `${(produit.prix * ligne.quantite).toFixed(2)}€` : 'N/A'}
+                            Prix unitaire: {produit ? `${produit.prix}DA` : 'N/A'} - 
+                            Total: {produit ? `${(produit.prix * ligne.quantite).toFixed(2)}DA` : 'N/A'}
                           </span>
                           {ligneErrors[index]?.produitId && (
                             <p className="text-xs text-red-500">{ligneErrors[index]?.produitId}</p>

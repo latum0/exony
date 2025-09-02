@@ -87,11 +87,11 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
     try {
       // Convertir la date en format ISO complet
       const submitData: RetourInput = {
-        ...data,
-        dateRetour: new Date(data.dateRetour).toISOString(),
-      };
-
-      await onSubmit(submitData);
+      ...data,
+      dateRetour: initialData 
+        ? data.dateRetour // Gardez le format existant pour la modification
+        : new Date(data.dateRetour).toISOString(), // Convertir pour la création
+    };
       toast.success(
         initialData ? "Retour modifié avec succès" : "Retour créé avec succès",
         {

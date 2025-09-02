@@ -107,7 +107,7 @@ export const CommandeDetailsModal: React.FC<CommandeDetailsModalProps> = ({
 
           <div className="space-y-3">
             <h4 className="font-semibold">Lignes de commande</h4>
-            {commande.ligne.map((ligne) => (
+            {commande?.ligne?.map((ligne) => (
               <div key={ligne.idLigne} className="bg-gray-50 p-3 rounded-md">
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
