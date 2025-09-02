@@ -102,7 +102,7 @@ export const RetoursPage = () => {
     }
   };
 
-  const handleDeleteClick = (retour: Retour) => {
+  const ajouter = (retour: Retour) => {
     setRetourToDelete(retour);
     setDeleteDialogOpen(true);
   };
@@ -143,16 +143,7 @@ export const RetoursPage = () => {
         <h2 className="text-2xl font-bold gap-x-2 flex items-center text-[#F8A67E]">
           <Undo2 size={28} /> Gestion des retours
         </h2>
-        <Button
-          onClick={() => {
-            setSelectedRetour(null);
-            setDialogOpen(true);
-          }}
-          style={{ background: "#F8A67E", borderRadius: "8px" }}
-        >
-          <PlusCircleIcon className="w-4 h-4 mr-[3px]" />
-          Ajouter
-        </Button>
+       
       </div>
 
       {error && (

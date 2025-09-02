@@ -7,8 +7,12 @@ import {
   PencilIcon,
   TrashIcon,
   Eye,
+  Undo2, // Ajout de l'icône de retour
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useCommandes } from "@/hooks/useCommandes";
+import { useRetour } from "@/hooks/useRetour"; // Import du hook pour les retours
 import {
   Table,
   TableBody,
@@ -18,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CommandeFormDialog } from "./components/CommandeFormDialog";
+import { RetourFormDialog } from "../retours/components/RetourFormDialog"; // Import du formulaire de retour
 import { DeleteConfirmationModal } from "./components/DeleteConfirmationModal";
 import { CommandeDetailsModal } from "./components/CommandeDetailsModal";
 import { Input } from "@/components/ui/input";
@@ -28,7 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const CommandesPage = () => {
   const {
@@ -45,6 +49,9 @@ export const CommandesPage = () => {
     resetCommande,
   } = useCommandes();
 
+  // Hook pour gérer les retours
+  const { createRetour } = useRetour();
+
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [selectedCommande, setSelectedCommande] = useState<CommandeResponseDto | null>(null);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -55,6 +62,10 @@ export const CommandesPage = () => {
     pageIndex: 0,
     pageSize: 5,
   });
+
+  // États pour gérer le retour
+  const [isRetourDialogOpen, setRetourDialogOpen] = useState(false);
+  const [commandeForRetour, setCommandeForRetour] = useState<CommandeResponseDto | null>(null);
 
   const [filters, setFilters] = useState({
     statut: "",
@@ -120,6 +131,24 @@ export const CommandesPage = () => {
     }
   };
 
+  // Fonction pour créer un retour à partir d'une commande
+  const handleCreateRetour = async (data: RetourInput) => {
+    if (commandeForRetour) {
+      try {
+        await createRetour({
+          ...data,
+          commandeId: commandeForRetour.idCommande,
+        });
+        setRetourDialogOpen(false);
+        setCommandeForRetour(null);
+        // Vous pourriez ajouter une notification de succès ici
+      } catch (error) {
+        console.error("Erreur lors de la création du retour:", error);
+        // Vous pourriez ajouter une notification d'erreur ici
+      }
+    }
+  };
+
   const handleViewDetails = async (idCommande: string) => {
     try {
       await getCommande(idCommande);
@@ -148,6 +177,12 @@ export const CommandesPage = () => {
     setDialogOpen(true);
   };
 
+  // Fonction pour ouvrir le formulaire de retour
+  const handleAddRetour = (commande: CommandeResponseDto) => {
+    setCommandeForRetour(commande);
+    setRetourDialogOpen(true);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
@@ -158,12 +193,13 @@ export const CommandesPage = () => {
     });
   };
 
-   const statutOptions = [
+  const statutOptions = [
     { value: "EN_ATTENTE", label: "En attente" },
     { value: "EN_COURS", label: "En cours" },
     { value: "LIVREE", label: "Livrée" },
     { value: "ANNULEE", label: "Annulée" },
   ];
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
@@ -212,7 +248,6 @@ export const CommandesPage = () => {
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
             <SelectContent>
-              {/* SUPPRIMER CETTE LIGNE : <SelectItem value="">Tous les statuts</SelectItem> */}
               {statutOptions.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -352,6 +387,14 @@ export const CommandesPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
+                            className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
+                            onClick={() => handleAddRetour(c)}
+                          >
+                            <Undo2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="text-red-500 hover:text-red-500"
                             onClick={() => handleDeleteClick(c)}
                           >
@@ -447,6 +490,22 @@ export const CommandesPage = () => {
             ? handleUpdateCommande
             : handleCreateCommande
         }
+      />
+
+      {/* Dialogue pour créer un retour */}
+      <RetourFormDialog
+        open={isRetourDialogOpen}
+        onClose={() => {
+          setRetourDialogOpen(false);
+          setCommandeForRetour(null);
+        }}
+        initialData={commandeForRetour ? {
+          commandeId: commandeForRetour.idCommande,
+          dateRetour: new Date().toISOString().slice(0, 16),
+          statutRetour: "PENDING",
+          raisonRetour: "",
+        } as any : null}
+        onSubmit={handleCreateRetour}
       />
 
       <DeleteConfirmationModal

@@ -91,7 +91,7 @@ export default function VerifyEmail() {
               <Button 
                 variant="outline" 
                 className="w-full"
-                onClick={() => window.location.href = '/login'}
+                onClick={() => window.location.href = '/'}
               >
                 Retour à la connexion
               </Button>
@@ -102,7 +102,7 @@ export default function VerifyEmail() {
             <Button 
               variant="outline" 
               className="w-full"
-              onClick={() => window.location.href = '/login'}
+              onClick={() => window.location.href = '/'}
             >
               Retour à la connexion
             </Button>

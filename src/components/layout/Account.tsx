@@ -14,7 +14,28 @@ import { Label } from "@/components/ui/label";
 import { User, Mail, Phone, Shield, Settings, Key, Eye, EyeOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { z } from "zod";
 
+
+
+// Schema de validation Zod
+const updateProfileSchema = z.object({
+  name: z.string()
+    .min(2, "Le nom doit contenir au moins 2 caractères")
+    .max(50, "Le nom ne peut pas dépasser 50 caractères")
+    .optional()
+    .or(z.literal("")),
+  email: z.string()
+    .email("Format d'email invalide")
+    .optional()
+    .or(z.literal("")),
+  phone: z.string()
+    .regex(/^(\+213|0)(5|6|7)[0-9]{8}$/, "Numéro de téléphone algérien invalide. Formats acceptés: +213XXXXXXXXX ou 0XXXXXXXXX")
+    .optional()
+    .or(z.literal("")),
+});
+
+type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;
 export function AccountModal({
   open,
   onClose,
@@ -22,7 +43,7 @@ export function AccountModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const { loading, error, profile } = useProfile();
+  const { profile, loading, error, updating, updateError, updateProfile} = useProfile();
   const { changePassword, isLoading: isChangingPassword, error: passwordError, isSuccess: passwordSuccess, resetState } = useChangePassword();
   const [tab, setTab] = useState("view");
   const [showPasswords, setShowPasswords] = useState({
@@ -36,7 +57,8 @@ export function AccountModal({
     email: profile?.email || "",
     phone: profile?.phone || "",
   });
-
+const [formErrors, setFormErrors] = useState<Partial<Record<keyof UpdateProfileFormData, string>>>({});
+const [touchedFields, setTouchedFields] = useState<Set<keyof UpdateProfileFormData>>(new Set());
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -73,6 +95,64 @@ export function AccountModal({
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+
+   const handleBlur = (field: keyof UpdateProfileFormData) => {
+    setTouchedFields(prev => new Set(prev).add(field));
+    validateField(field, formData[field]);
+  };
+
+  const validateField = (field: keyof UpdateProfileFormData, value: string) => {
+    try {
+      // Pour les champs vides, on les transforme en undefined pour la validation
+      const fieldValue = value.trim() === "" ? undefined : value;
+      
+      if (field === 'name') {
+        updateProfileSchema.pick({ [field]: true }).parse({ [field]: fieldValue });
+      } else if (field === 'email') {
+        updateProfileSchema.pick({ [field]: true }).parse({ [field]: fieldValue });
+      } else if (field === 'phone') {
+        updateProfileSchema.pick({ [field]: true }).parse({ [field]: fieldValue });
+      }
+      
+      setFormErrors(prev => ({ ...prev, [field]: undefined }));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setFormErrors(prev => ({ 
+          ...prev, 
+          [field]: error.errors[0]?.message 
+        }));
+      }
+    }
+  };
+
+  const validateForm = (): boolean => {
+    try {
+      // Pour la validation complète, on envoie les champs vides comme undefined
+      const dataToValidate = {
+        name: formData.name?.trim() === "" ? undefined : formData.name,
+        email: formData.email?.trim() === "" ? undefined : formData.email,
+        phone: formData.phone?.trim() === "" ? undefined : formData.phone,
+      };
+      
+      updateProfileSchema.parse(dataToValidate);
+      setFormErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Partial<Record<keyof UpdateProfileFormData, string>> = {};
+        error.errors.forEach(err => {
+          const field = err.path[0] as keyof UpdateProfileFormData;
+          newErrors[field] = err.message;
+        });
+        setFormErrors(newErrors);
+        
+        // Marquer tous les champs comme touchés pour afficher les erreurs
+        setTouchedFields(new Set(['name', 'email', 'phone']));
+      }
+      return false;
+    }
+  };
+
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     
@@ -89,9 +169,42 @@ export function AccountModal({
     }));
   };
 
-  const handleUpdate = () => {
-    console.log("Nouvelles données :", formData);
-    toast.success("Profil mis à jour avec succès !");
+   const handleUpdate = async () => {
+    // Vérifier si les données ont changé
+    const hasChanges = 
+      formData.name !== profile?.name ||
+      formData.email !== profile?.email ||
+      formData.phone !== profile?.phone;
+
+    if (!hasChanges) {
+      toast.info("Aucune modification détectée");
+      return;
+    }
+
+    // Valider le formulaire
+    if (!validateForm()) {
+      toast.error("Veuillez corriger les erreurs dans le formulaire");
+      return;
+    }
+
+    try {
+      // Préparer les données pour l'API (champs vides -> undefined)
+      const apiData = {
+        name: formData.name?.trim() === "" ? undefined : formData.name,
+        email: formData.email?.trim() === "" ? undefined : formData.email,
+        phone: formData.phone?.trim() === "" ? undefined : formData.phone,
+      };
+
+      const result = await updateProfile(apiData);
+      
+      if (result.success) {
+        toast.success("Profil mis à jour avec succès !");
+        // Revenir à l'onglet view après succès
+        setTab("view");
+      }
+    } catch (err) {
+      // L'erreur est déjà gérée dans le hook
+    }
   };
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
@@ -116,7 +229,7 @@ export function AccountModal({
       // L'erreur est déjà gérée dans le hook et affichée via toast
     }
   };
-
+const hasErrors = Object.values(formErrors).some(error => error !== undefined);
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg rounded-2xl">
@@ -195,7 +308,7 @@ export function AccountModal({
               </div>
             </TabsContent>
 
-            {/* Modifier le profil */}
+             {/* Modifier le profil */}
             <TabsContent value="edit" className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nom</Label>
@@ -204,7 +317,12 @@ export function AccountModal({
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
+                  onBlur={() => handleBlur('name')}
+                  className={formErrors.name ? "border-destructive" : ""}
                 />
+                {formErrors.name && (
+                  <p className="text-destructive text-xs">{formErrors.name}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -214,7 +332,12 @@ export function AccountModal({
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={() => handleBlur('email')}
+                  className={formErrors.email ? "border-destructive" : ""}
                 />
+                {formErrors.email && (
+                  <p className="text-destructive text-xs">{formErrors.email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Téléphone</Label>
@@ -224,16 +347,25 @@ export function AccountModal({
                   type="tel"
                   value={formData.phone}
                   onChange={handleChange}
+                  onBlur={() => handleBlur('phone')}
+                  className={formErrors.phone ? "border-destructive" : ""}
+                  placeholder="+213612345678 ou 0612345678"
                 />
+                {formErrors.phone && (
+                  <p className="text-destructive text-xs">{formErrors.phone}</p>
+                )}
+                <p className="text-muted-foreground text-xs">
+                  Formats acceptés: +213XXXXXXXXX ou 0XXXXXXXXX
+                </p>
               </div>
               <Button
                 onClick={handleUpdate}
-                className="w-full mt-4 bg-gradient-to-r to-[#f7b154] from-[#F8A67E] text-white shadow-md hover:opacity-90"
+                disabled={updating || hasErrors}
+                className="w-full mt-4 bg-gradient-to-r to-[#f7b154] from-[#F8A67E] text-white shadow-md hover:opacity-90 disabled:opacity-50"
               >
-                Mettre à jour
+                {updating ? "Mise à jour..." : "Mettre à jour"}
               </Button>
             </TabsContent>
-
             {/* Modifier le mot de passe */}
             <TabsContent value="password">
               <form onSubmit={handlePasswordUpdate} className="space-y-4">
