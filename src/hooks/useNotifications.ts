@@ -34,6 +34,13 @@ export interface NotificationsResponse {
   };
 }
 
+// Interface pour la réponse réelle de l'API
+interface ApiNotificationsResponse {
+  data: Notification[];
+}
+
+const NOTIFICATIONS_READ_KEY = 'read_notifications';
+
 export default function useNotifications() {
   const dispatch = useDispatch();
   const { notifications, currentNotification, loading, error, deleting } =
@@ -41,17 +48,61 @@ export default function useNotifications() {
 
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Récupérer les IDs des notifications lues
+  const getReadNotifications = (): string[] => {
+    try {
+      const read = localStorage.getItem(NOTIFICATIONS_READ_KEY);
+      return read ? JSON.parse(read) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  // Marquer une notification comme lue
+  const markAsRead = (id: string): void => {
+    try {
+      const readNotifications = getReadNotifications();
+      if (!readNotifications.includes(id)) {
+        const updated = [...readNotifications, id];
+        localStorage.setItem(NOTIFICATIONS_READ_KEY, JSON.stringify(updated));
+        // Mettre à jour le compteur
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('Erreur lors du marquage comme lu:', error);
+    }
+  };
+
+  // Marquer toutes les notifications comme lues
+  const markAllAsRead = (): void => {
+    try {
+      if (notifications.items && notifications.items.length > 0) {
+        const currentNotificationIds = notifications.items.map(notif => notif.id);
+        localStorage.setItem(NOTIFICATIONS_READ_KEY, JSON.stringify(currentNotificationIds));
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Erreur lors du marquage de toutes les notifications:', error);
+    }
+  };
+
+  // Vérifier si une notification est lue
+  const isNotificationRead = (id: string): boolean => {
+    return getReadNotifications().includes(id);
+  };
 
   // Récupérer toutes les notifications
-  const fetchNotifications = async (page: number = 1, limit: number = 25) => {
+  const fetchNotifications = async () => {
     try {
       dispatch(fetchNotificationsStart());
       setLocalLoading(true);
       setLocalError(null);
 
       const token = localStorage.getItem("accessToken");
-      const response = await api.get<NotificationsResponse>(
-        `/notifications?page=${page}&limit=${limit}`,
+      const response = await api.get<ApiNotificationsResponse>(
+        `/notifications`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -59,8 +110,25 @@ export default function useNotifications() {
         }
       );
 
-      dispatch(fetchNotificationsSuccess(response.data));
-      return response.data;
+      console.log("Réponse de l'API:", response.data); // Debug
+
+      // Adapter la réponse à la structure attendue par le slice
+      const adaptedResponse: NotificationsResponse = {
+        items: response.data.data || [], // Prendre le tableau depuis data
+        meta: {
+          total: response.data.data?.length || 0,
+          page: 1,
+          limit: response.data.data?.length || 0,
+          totalPages: 1
+        }
+      };
+
+      dispatch(fetchNotificationsSuccess(adaptedResponse));
+      
+      // Mettre à jour le compteur de notifications non lues
+      updateUnreadCount(adaptedResponse.items);
+      
+      return adaptedResponse;
     } catch (err: any) {
       console.error("Erreur récupération notifications :", err);
       const errorMessage = err?.response?.data?.message || "Erreur serveur";
@@ -69,6 +137,18 @@ export default function useNotifications() {
       throw new Error(errorMessage);
     } finally {
       setLocalLoading(false);
+    }
+  };
+
+  // Mettre à jour le compteur de notifications non lues
+  const updateUnreadCount = (notifs: Notification[]) => {
+    if (notifs && notifs.length > 0) {
+      const unread = notifs.filter(notif => 
+        !notif.resolved && !isNotificationRead(notif.id)
+      ).length;
+      setUnreadCount(unread);
+    } else {
+      setUnreadCount(0);
     }
   };
 
@@ -113,6 +193,12 @@ export default function useNotifications() {
       });
 
       dispatch(deleteNotificationSuccess(id));
+      
+      // Mettre à jour le compteur après suppression
+      if (!isNotificationRead(id)) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+      
       return response.data;
     } catch (err: any) {
       console.error("Erreur suppression notification :", err);
@@ -121,6 +207,21 @@ export default function useNotifications() {
       setLocalError(errorMessage);
       throw new Error(errorMessage);
     }
+  };
+
+  // Méthode pour marquer une notification comme lue
+  const markNotificationAsRead = (id: string) => {
+    markAsRead(id);
+  };
+
+  // Méthode pour marquer toutes les notifications comme lues
+  const markAllNotificationsAsRead = () => {
+    markAllAsRead();
+  };
+
+  // Méthode pour vérifier le statut de lecture
+  const checkIfRead = (id: string): boolean => {
+    return isNotificationRead(id);
   };
 
   // Réinitialiser les erreurs
@@ -136,11 +237,15 @@ export default function useNotifications() {
     loading: loading || localLoading,
     error: error || localError,
     deleting,
+    unreadCount,
 
     // Méthodes
     fetchNotifications,
     fetchNotification,
     deleteNotification,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    checkIfRead,
     resetError,
   };
 }

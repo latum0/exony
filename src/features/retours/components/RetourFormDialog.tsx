@@ -1,3 +1,4 @@
+// src/pages/retours/components/RetourFormDialog.tsx
 import React, { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Retour, RetourInput } from "@/hooks/useRetour";
@@ -37,7 +38,7 @@ interface RetourFormDialogProps {
   open: boolean;
   onClose: () => void;
   initialData?: Retour | null;
-  onSubmit: (data: RetourInput) => Promise<void> | void;
+  onSubmit: (data: RetourInput) => Promise<void>;
 }
 
 export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
@@ -67,8 +68,13 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
 
   useEffect(() => {
     if (initialData) {
+      // Pour l'édition, formater la date pour l'input datetime-local
+      const dateRetour = initialData.dateRetour 
+        ? new Date(initialData.dateRetour).toISOString().slice(0, 16)
+        : new Date().toISOString().slice(0, 16);
+        
       reset({
-        dateRetour: initialData.dateRetour ? new Date(initialData.dateRetour).toISOString().slice(0, 16) : "",
+        dateRetour,
         statutRetour: initialData.statutRetour as "PENDING" | "COMPLETED" | "CANCELLED",
         raisonRetour: initialData.raisonRetour || "",
         commandeId: initialData.commandeId || "",
@@ -85,13 +91,14 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
 
   const onFormSubmit = async (data: RetourFormData) => {
     try {
-      // Convertir la date en format ISO complet
+      // Convertir la date en format ISO complet pour l'API
       const submitData: RetourInput = {
-      ...data,
-      dateRetour: initialData 
-        ? data.dateRetour // Gardez le format existant pour la modification
-        : new Date(data.dateRetour).toISOString(), // Convertir pour la création
-    };
+        ...data,
+        dateRetour: new Date(data.dateRetour).toISOString(),
+      };
+      
+      await onSubmit(submitData);
+      
       toast.success(
         initialData ? "Retour modifié avec succès" : "Retour créé avec succès",
         {
@@ -101,8 +108,10 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
           duration: 3000,
         }
       );
+      
       onClose();
     } catch (error) {
+      console.error("Erreur lors de la soumission du formulaire:", error);
       toast.error(
         initialData ? "Erreur de modification" : "Erreur de création",
         {
@@ -174,6 +183,7 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
               {...register("commandeId")}
               placeholder="ID de la commande"
               className={errors.commandeId ? "border-red-500" : ""}
+              readOnly={!!initialData} // Lecture seule en mode édition
             />
             {errors.commandeId && (
               <p className="text-red-500 text-sm">{errors.commandeId.message}</p>

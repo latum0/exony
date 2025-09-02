@@ -15,6 +15,15 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, Eye, Trash2, CheckCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
+// Définition du type Notification
+interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  createdAt: string;
+  resolved: boolean;
+}
+
 export function SiteHeader() {
   const { profile, error: profileError } = useProfile();
   const {
@@ -24,7 +33,9 @@ export function SiteHeader() {
     deleting,
     fetchNotifications,
     deleteNotification,
-    markAsResolved
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    checkIfRead,
   } = useNotifications();
 
   const [unreadCount, setUnreadCount] = useState(0);
@@ -44,44 +55,87 @@ export function SiteHeader() {
     }
   }, [profileError]);
 
+  // Charger les notifications initiales et surveiller les changements
+  useEffect(() => {
+    if (profile?.role === "ADMIN") {
+      fetchNotifications();
+      
+      // Écouter les changements de localStorage pour les nouvelles notifications
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'notifications') {
+          fetchNotifications();
+        }
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+      };
+    }
+  }, [profile?.role]);
+
   // Charger les notifications quand le dropdown s'ouvre
   useEffect(() => {
     if (isNotificationsOpen && profile?.role === "ADMIN") {
-      fetchNotifications(1, 10);
+      fetchNotifications();
     }
   }, [isNotificationsOpen, profile?.role]);
 
-  // Calculer le nombre de notifications non résolues
+  // Calculer le nombre de notifications non lues
   useEffect(() => {
-    if (notifications && notifications?.length > 0) {
-      const unresolved = notifications.filter(
-        (notif) => !notif.resolved
+    if (notifications && notifications.length > 0) {
+      // Vérifier dans localStorage quelles notifications ont été lues
+      const readNotifications = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+      
+      const unread = notifications.filter(notif => 
+        !notif.resolved && !readNotifications.includes(notif.id)
       ).length;
-      setUnreadCount(unresolved);
+      
+      setUnreadCount(unread);
     } else {
       setUnreadCount(0);
     }
   }, [notifications]);
 
+  // Fonction pour marquer une notification comme résolue avec localStorage
+  const handleMarkAsResolved = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      // Récupérer les notifications depuis localStorage
+      const storedNotifications = localStorage.getItem('notifications');
+      if (storedNotifications) {
+        const notificationsData: Notification[] = JSON.parse(storedNotifications);
+        
+        // Mettre à jour la notification spécifique
+        const updatedNotifications = notificationsData.map(notif => 
+          notif.id === id ? { ...notif, resolved: true } : notif
+        );
+        
+        // Sauvegarder dans localStorage
+        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+        
+        // Rafraîchir les notifications affichées
+        if (isNotificationsOpen) {
+          fetchNotifications();
+        }
+        
+        toast.success("Notification marquée comme résolue");
+      }
+    } catch (err) {
+      console.error("Erreur lors du marquage comme résolu:", err);
+      toast.error("Échec de l'opération");
+    }
+  };
+
   const handleDeleteNotification = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Empêcher la fermeture du dropdown
+    e.stopPropagation();
     try {
       await deleteNotification(id);
       toast.success("Notification supprimée");
     } catch (err) {
       console.error("Erreur lors de la suppression:", err);
       toast.error("Échec de la suppression");
-    }
-  };
-
-  const handleMarkAsResolved = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      await markAsResolved(id);
-      toast.success("Notification marquée comme résolue");
-    } catch (err) {
-      console.error("Erreur lors du marquage comme résolu:", err);
-      toast.error("Échec de l'opération");
     }
   };
 
@@ -107,6 +161,23 @@ export function SiteHeader() {
     }
   };
 
+  // Marquer une notification comme lue quand on clique dessus
+  const handleNotificationClick = (notification: Notification) => {
+    markNotificationAsRead(notification.id);
+    
+    // Mettre à jour le compteur de notifications non lues
+    setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    console.log("Voir détails:", notification.id);
+  };
+
+  // Marquer toutes les notifications comme lues
+  const handleMarkAllAsRead = () => {
+    markAllNotificationsAsRead();
+    setUnreadCount(0);
+    toast.success("Toutes les notifications marquées comme lues");
+  };
+
   return (
     <header className="sticky top-0 bg-[#fafafa] z-50 h-16 flex items-center shadow-sm border-b pr-4 lg:pr-6 pl-4">
       <div className="flex w-full items-center">
@@ -117,7 +188,12 @@ export function SiteHeader() {
           {profile?.role === "ADMIN" && (
             <DropdownMenu
               open={isNotificationsOpen}
-              onOpenChange={setIsNotificationsOpen}
+              onOpenChange={(open) => {
+                setIsNotificationsOpen(open);
+                if (!open && unreadCount > 0) {
+                  handleMarkAllAsRead();
+                }
+              }}
             >
               <DropdownMenuTrigger asChild>
                 <Button
@@ -142,12 +218,24 @@ export function SiteHeader() {
               >
                 <div className="flex items-center justify-between p-2 border-b">
                   <h3 className="font-semibold">Notifications</h3>
-                  {notifications && (
-                    <Badge variant="outline">
-                      {notifications.length}{" "}
-                      {notifications.length > 1 ? "notifs" : "notif"}
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {notifications && (
+                      <Badge variant="outline">
+                        {notifications.length}{" "}
+                        {notifications.length > 1 ? "notifs" : "notif"}
+                      </Badge>
+                    )}
+                    {unreadCount > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 text-xs"
+                        onClick={handleMarkAllAsRead}
+                      >
+                        Tout marquer comme lu
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {loading ? (
@@ -164,74 +252,79 @@ export function SiteHeader() {
                   </div>
                 ) : (
                   <div className="space-y-1 p-1">
-                    {notifications.map((notification) => (
-                      <DropdownMenuItem
-                        key={notification.id}
-                        className="flex flex-col items-start p-3 rounded-md cursor-pointer hover:bg-accent"
-                        onClick={() => {
-                          // Action quand on clique sur une notification
-                          console.log("Voir détails:", notification.id);
-                          // Vous pourriez naviguer vers la page concernée ici
-                        }}
-                      >
-                        <div className="flex items-start justify-between w-full mb-2">
-                          <div className="flex items-center gap-2">
-                            {getNotificationIcon(notification.type)}
-                            <span className="text-sm font-medium">
-                              {getNotificationLabel(notification.type)}
-                            </span>
+                    {notifications.map((notification) => {
+                      // Vérifier si la notification a été lue
+                      const readNotifications = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+                      const isRead = readNotifications.includes(notification.id);
+                      
+                      return (
+                        <DropdownMenuItem
+                          key={notification.id}
+                          className={`flex flex-col items-start p-3 rounded-md cursor-pointer hover:bg-accent ${isRead ? 'opacity-70' : 'bg-blue-50'}`}
+                          onClick={() => handleNotificationClick(notification)}
+                        >
+                          <div className="flex items-start justify-between w-full mb-2">
+                            <div className="flex items-center gap-2">
+                              {getNotificationIcon(notification.type)}
+                              <span className="text-sm font-medium">
+                                {getNotificationLabel(notification.type)}
+                                {!isRead && (
+                                  <span className="ml-2 inline-block h-2 w-2 rounded-full bg-blue-500"></span>
+                                )}
+                              </span>
+                            </div>
+                            {notification.resolved ? (
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <Badge variant="outline" className="text-xs">
+                                Non résolu
+                              </Badge>
+                            )}
                           </div>
-                          {notification.resolved ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Badge variant="outline" className="text-xs">
-                              Non résolu
-                            </Badge>
-                          )}
-                        </div>
 
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {notification.message}
-                        </p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {notification.message}
+                          </p>
 
-                        <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-                          <span>
-                            {new Date(
-                              notification.createdAt
-                            ).toLocaleDateString()}
-                          </span>
-                          <div className="flex gap-1">
-                            {!notification.resolved && (
+                          <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
+                            <span>
+                              {new Date(
+                                notification.createdAt
+                              ).toLocaleDateString()}
+                            </span>
+                            <div className="flex gap-1">
+                              {!notification.resolved && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={(e) => handleMarkAsResolved(notification.id, e)}
+                                  title="Marquer comme résolu"
+                                >
+                                  <CheckCircle className="h-3 w-3" />
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6"
-                                onClick={(e) => handleMarkAsResolved(notification.id, e)}
-                                title="Marquer comme résolu"
+                                onClick={(e) =>
+                                  handleDeleteNotification(notification.id, e)
+                                }
+                                disabled={deleting.includes(notification.id)}
+                                title="Supprimer la notification"
                               >
-                                <CheckCircle className="h-3 w-3" />
+                                {deleting.includes(notification.id) ? (
+                                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                ) : (
+                                  <Trash2 className="h-3 w-3" />
+                                )}
                               </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={(e) =>
-                                handleDeleteNotification(notification.id, e)
-                              }
-                              disabled={deleting.includes(notification.id)}
-                              title="Supprimer la notification"
-                            >
-                              {deleting.includes(notification.id) ? (
-                                <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                              ) : (
-                                <Trash2 className="h-3 w-3" />
-                              )}
-                            </Button>
+                            </div>
                           </div>
-                        </div>
-                      </DropdownMenuItem>
-                    ))}
+                        </DropdownMenuItem>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -241,9 +334,7 @@ export function SiteHeader() {
                     <DropdownMenuItem
                       className="text-xs text-center text-muted-foreground cursor-pointer"
                       onClick={() => {
-                        // Action pour voir toutes les notifications
                         console.log("Voir toutes les notifications");
-                        // Navigation vers une page dédiée aux notifications
                       }}
                     >
                       Voir toutes les notifications

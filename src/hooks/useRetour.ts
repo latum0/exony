@@ -1,3 +1,4 @@
+// hooks/useRetour.ts
 import { useState } from 'react';
 import api from "@/api/axios";
 
@@ -73,7 +74,7 @@ export const useRetour = (): UseRetourReturn => {
 
     setError(errorMessage);
     setLoading(false);
-    return undefined;
+    throw new Error(errorMessage); // Lancer l'erreur pour la gérer dans le composant
   };
 
   const getRetours = async (page: number = 1, perPage: number = 25, dateFrom?: string, dateTo?: string, search?: string) => {
@@ -111,7 +112,13 @@ export const useRetour = (): UseRetourReturn => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.post<Retour>('/retours', data);
+      // Conversion de la date au format ISO
+      const formattedData = {
+        ...data,
+        dateRetour: new Date(data.dateRetour).toISOString()
+      };
+      
+      const response = await api.post<Retour>('/retours', formattedData);
       setRetours(prev => [...prev, response.data]);
       setLoading(false);
       return response.data;

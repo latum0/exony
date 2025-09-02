@@ -57,12 +57,12 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
   onSubmit,
 }) => {
   const [formData, setFormData] = useState({
-    dateCommande: new Date().toISOString().slice(0, 16),
-    statut: "EN_ATTENTE",
-    adresseLivraison: "",
-    clientId: "",
-    lignes: [] as Array<{ produitId: string; quantite: number }>,
-  });
+  dateCommande: new Date().toISOString().slice(0, 16),
+  statut: "EN_ATTENTE",
+  adresseLivraison: "",
+  clientId: "", // Doit être string pour correspondre à Select value
+  lignes: [] as Array<{ produitId: string; quantite: number }>,
+});
 
   const [newLigne, setNewLigne] = useState({ produitId: "", quantite: 1 });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -77,30 +77,20 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
     }
   }, [open]);
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        dateCommande: initialData.dateCommande.slice(0, 16),
-        statut: initialData.statut,
-        adresseLivraison: initialData.adresseLivraison,
-        clientId: initialData.clientId.toString(),
-        lignes: initialData.ligne.map(l => ({
-          produitId: l.produitId,
-          quantite: l.quantite,
-        })),
-      });
-    } else {
-      setFormData({
-        dateCommande: new Date().toISOString().slice(0, 16),
-        statut: "EN_ATTENTE",
-        adresseLivraison: "",
-        clientId: "",
-        lignes: [],
-      });
-    }
-    setErrors({});
-    setLigneErrors({});
-  }, [initialData, open]);
+ useEffect(() => {
+  if (initialData) {
+    setFormData({
+      dateCommande: initialData.dateCommande.slice(0, 16),
+      statut: initialData.statut,
+      adresseLivraison: initialData.adresseLivraison,
+      clientId: initialData.clientId.toString(), // Convertir number en string
+      lignes: initialData.ligne.map(l => ({
+        produitId: l.produitId,
+        quantite: l.quantite,
+      })),
+    });
+  }
+}, [initialData, open]);
 
  const fetchClientsAndProduits = async () => {
   setLoading(true);
@@ -135,13 +125,13 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
     }
   };
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
-    }
-  };
+ const handleSelectChange = (name: string, value: string) => {
+  setFormData(prev => ({ ...prev, [name]: value }));
+  
+  if (errors[name]) {
+    setErrors(prev => ({ ...prev, [name]: "" }));
+  }
+};
 
   const addLigne = () => {
     // Trouver le produit sélectionné
@@ -354,21 +344,21 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="clientId">Client *</Label>
-              <Select
-                value={formData.clientId}
-                onValueChange={(value) => handleSelectChange("clientId", value)}
-              >
-                <SelectTrigger className={errors.clientId ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Sélectionner un client" />
-                </SelectTrigger>
-                <SelectContent>
-  {clients.map((client) => (
-    <SelectItem key={client.id} value={client.id?.toString()}>
-      {getClientFullName(client)}
-    </SelectItem>
-  ))}
-</SelectContent>
-              </Select>
+            <Select
+  value={formData.clientId}
+  onValueChange={(value) => handleSelectChange("clientId", value)}
+>
+  <SelectTrigger className={errors.clientId ? "border-red-500" : ""}>
+    <SelectValue placeholder="Sélectionner un client" />
+  </SelectTrigger>
+  <SelectContent>
+    {clients.map((client) => (
+      <SelectItem key={client.id} value={client.id?.toString()}>
+        {getClientFullName(client)}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
               {errors.clientId && (
                 <p className="text-sm text-red-500">{errors.clientId}</p>
               )}
@@ -379,29 +369,28 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
               
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
                 <div className="sm:col-span-3">
-                  <Select
-                    value={newLigne.produitId}
-                    onValueChange={(value) => {
-                      const produit = produits.find(p => p.id === value);
-                      setNewLigne(prev => ({ 
-                        ...prev, 
-                        produitId: value,
-                        // Réinitialiser la quantité à 1 ou au maximum disponible
-                        quantite: 1
-                      }));
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un produit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {produits.map((produit) => (
-                        <SelectItem key={produit.id} value={produit.id}>
-                          {produit.nom} - Stock: {produit.quantite}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                 <Select
+  value={newLigne.produitId}
+  onValueChange={(value) => {
+    const produit = produits.find(p => p.id === value);
+    setNewLigne(prev => ({ 
+      ...prev, 
+      produitId: value,
+      quantite: 1
+    }));
+  }}
+>
+  <SelectTrigger>
+    <SelectValue placeholder="Sélectionner un produit" />
+  </SelectTrigger>
+  <SelectContent>
+    {produits.map((produit) => (
+      <SelectItem key={produit.id} value={produit.id}>
+        {produit.nom} - Stock: {produit.quantite}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
                 </div>
                 
                 <div className="sm:col-span-1">
