@@ -1,13 +1,14 @@
 // src/store/slices/profileSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+export type Permission = "AGENT_DE_STOCK" | "CONFIRMATEUR" | "SAV";
 
 interface Profile {
   id: number;
   email: string;
   phone: string;
   role: string;
-  permissions: any;
+  permissions: Permission[];
   name: string;
   emailVerified: boolean;
   createdAt: string;

@@ -10,13 +10,13 @@ export function RegisterForm() {
     email: "",
     phone: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [e.target.id]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.id]: e.target.value }));
     setError(""); // Reset error when typing
   };
 
@@ -26,14 +26,13 @@ export function RegisterForm() {
       setError("Les mots de passe ne correspondent pas.");
       return;
     }
-
-    // TODO: API call
-    console.log("Données d'inscription :", form);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 mt-8 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold text-center text-gray-800">Créer un compte</h2>
+      <h2 className="text-2xl font-bold text-center text-gray-800">
+        Créer un compte
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Nom complet */}
@@ -87,7 +86,6 @@ export function RegisterForm() {
           </div>
         </div>
 
-
         {/* Mot de passe */}
         <div className="space-y-1.5">
           <Label htmlFor="password">Mot de passe</Label>
@@ -131,8 +129,8 @@ export function RegisterForm() {
       {/* Bouton de soumission */}
       <Button
         type="submit"
-         style={{background:"#F8A67E"}}  
-         className="w-full bg-[#F8A67E] hover:bg-[#f78d60] text-white font-semibold transition-colors duration-200"
+        style={{ background: "#F8A67E" }}
+        className="w-full bg-[#F8A67E] hover:bg-[#f78d60] text-white font-semibold transition-colors duration-200"
       >
         S’inscrire
       </Button>

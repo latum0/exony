@@ -39,7 +39,7 @@ interface ApiNotificationsResponse {
   data: Notification[];
 }
 
-const NOTIFICATIONS_READ_KEY = 'read_notifications';
+const NOTIFICATIONS_READ_KEY = "read_notifications";
 
 export default function useNotifications() {
   const dispatch = useDispatch();
@@ -68,10 +68,10 @@ export default function useNotifications() {
         const updated = [...readNotifications, id];
         localStorage.setItem(NOTIFICATIONS_READ_KEY, JSON.stringify(updated));
         // Mettre à jour le compteur
-        setUnreadCount(prev => Math.max(0, prev - 1));
+        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     } catch (error) {
-      console.error('Erreur lors du marquage comme lu:', error);
+      console.error("Erreur lors du marquage comme lu:", error);
     }
   };
 
@@ -79,12 +79,20 @@ export default function useNotifications() {
   const markAllAsRead = (): void => {
     try {
       if (notifications.items && notifications.items.length > 0) {
-        const currentNotificationIds = notifications.items.map(notif => notif.id);
-        localStorage.setItem(NOTIFICATIONS_READ_KEY, JSON.stringify(currentNotificationIds));
+        const currentNotificationIds = notifications.items.map(
+          (notif) => notif.id
+        );
+        localStorage.setItem(
+          NOTIFICATIONS_READ_KEY,
+          JSON.stringify(currentNotificationIds)
+        );
         setUnreadCount(0);
       }
     } catch (error) {
-      console.error('Erreur lors du marquage de toutes les notifications:', error);
+      console.error(
+        "Erreur lors du marquage de toutes les notifications:",
+        error
+      );
     }
   };
 
@@ -110,8 +118,6 @@ export default function useNotifications() {
         }
       );
 
-      console.log("Réponse de l'API:", response.data); // Debug
-
       // Adapter la réponse à la structure attendue par le slice
       const adaptedResponse: NotificationsResponse = {
         items: response.data.data || [], // Prendre le tableau depuis data
@@ -119,15 +125,15 @@ export default function useNotifications() {
           total: response.data.data?.length || 0,
           page: 1,
           limit: response.data.data?.length || 0,
-          totalPages: 1
-        }
+          totalPages: 1,
+        },
       };
 
       dispatch(fetchNotificationsSuccess(adaptedResponse));
-      
+
       // Mettre à jour le compteur de notifications non lues
       updateUnreadCount(adaptedResponse.items);
-      
+
       return adaptedResponse;
     } catch (err: any) {
       console.error("Erreur récupération notifications :", err);
@@ -143,8 +149,8 @@ export default function useNotifications() {
   // Mettre à jour le compteur de notifications non lues
   const updateUnreadCount = (notifs: Notification[]) => {
     if (notifs && notifs.length > 0) {
-      const unread = notifs.filter(notif => 
-        !notif.resolved && !isNotificationRead(notif.id)
+      const unread = notifs.filter(
+        (notif) => !notif.resolved && !isNotificationRead(notif.id)
       ).length;
       setUnreadCount(unread);
     } else {
@@ -193,12 +199,12 @@ export default function useNotifications() {
       });
 
       dispatch(deleteNotificationSuccess(id));
-      
+
       // Mettre à jour le compteur après suppression
       if (!isNotificationRead(id)) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
+        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
-      
+
       return response.data;
     } catch (err: any) {
       console.error("Erreur suppression notification :", err);

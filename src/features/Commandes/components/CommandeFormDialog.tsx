@@ -143,10 +143,12 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
         adresseLivraison: initialData.adresseLivraison,
         clientId: initialData.clientId.toString(),
         lignes: initialData.ligne
-          ? initialData.ligne.map((l: any) => ({
-              produitId: l.produitId,
-              quantite: l.quantite,
-            }))
+          ? initialData.ligne.map(
+              (l: { produitId: string; quantite: number }) => ({
+                produitId: l.produitId,
+                quantite: l.quantite,
+              })
+            )
           : [],
       });
       setSelectedDate(new Date(initialData.dateCommande));
@@ -162,7 +164,7 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
       const response = await api.get(
         `/clients?search=${clientSearch}&page=${page}&perPage=10`
       );
-      console.log(response.data);
+
       const clientsData = response.data.data || response.data;
       const newClients = Array.isArray(clientsData) ? clientsData : [];
 
@@ -193,7 +195,7 @@ export const CommandeFormDialog: React.FC<CommandeFormDialogProps> = ({
       const response = await api.get(
         `/produits?nom=${produitSearch}&page=${page}&limit=10`
       );
-      console.log(response);
+
       const produitsData = response.data.data || response.data;
       const newProduits = Array.isArray(produitsData) ? produitsData : [];
 

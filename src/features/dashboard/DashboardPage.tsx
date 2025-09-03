@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -38,18 +38,14 @@ export default function DashboardStats() {
   const [produitId, setProduitId] = useState("");
 
   const fetchAllStats = () => {
-    if (!dateFrom || !dateTo) {
-      return;
-    }
-
     const params: {
-      dateFrom: string;
-      dateTo: string;
+      dateFrom?: string;
+      dateTo?: string;
       produitId?: string;
-    } = {
-      dateFrom: format(dateFrom, "yyyy-MM-dd"),
-      dateTo: format(dateTo, "yyyy-MM-dd"),
-    };
+    } = {};
+
+    if (dateFrom) params.dateFrom = format(dateFrom, "yyyy-MM-dd");
+    if (dateTo) params.dateTo = format(dateTo, "yyyy-MM-dd");
     if (produitId) params.produitId = produitId;
 
     dispatch(fetchCommandeStats(params));
@@ -57,6 +53,11 @@ export default function DashboardStats() {
     dispatch(fetchRetourStats(params));
     dispatch(fetchRetourCommandeStats(params));
   };
+
+  // fetch par défaut au montage
+  useEffect(() => {
+    fetchAllStats();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
@@ -186,8 +187,7 @@ export default function DashboardStats() {
               {/* Filter Button */}
               <Button
                 onClick={fetchAllStats}
-                disabled={!dateFrom || !dateTo}
-                className="bg-[#F8A67E] hover:bg-[#F8A67E]/90 text-white font-medium px-6 sm:px-8 py-2 shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed  h-9 "
+                className="bg-[#F8A67E] hover:bg-[#F8A67E]/90 text-white font-medium px-6 sm:px-8 py-2 shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto h-9"
               >
                 Filtrer les Données
               </Button>

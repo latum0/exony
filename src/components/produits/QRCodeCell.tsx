@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 export function QRCodeCell({ value }: { value: string }) {
   const [open, setOpen] = useState(false);
-  const qrRef = useRef<SVGSVGElement | null>(null);
+  const qrRef = useRef<SVGSVGElement>(null!);
 
   if (!value) {
     return <span className="text-gray-400 text-sm">N/A</span>;
@@ -61,7 +61,14 @@ export function QRCodeCell({ value }: { value: string }) {
             <DialogTitle>Code QR</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 p-4">
-            <QRCode ref={qrRef} value={value} size={256} />
+            <QRCode
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              //@ts-ignore
+              ref={qrRef}
+              value={value}
+              size={256}
+            />
+            ;
             <Button onClick={handleDownload} className="w-fit h-10">
               Télécharger le QR Code
             </Button>

@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "@/api/axios";
+import type { AxiosError } from "axios";
 
 export interface ProduitFormValues {
   nom: string;
@@ -41,12 +42,10 @@ export const createProduit = createAsyncThunk(
       formData.append("marque", produit.marque);
       formData.append("categorie", produit.categorie);
 
-      // Add images
       produit.images.forEach((image, index) => {
         formData.append(`images`, image);
       });
 
-      // Add suppliers as JSON array
       formData.append("fournisseurs", JSON.stringify(produit.fournisseurs));
 
       const response = await api.post("/produits", formData, {
@@ -56,11 +55,12 @@ export const createProduit = createAsyncThunk(
       });
 
       return response.data;
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
       return rejectWithValue({
-        status: err?.response?.status ?? 500,
+        status: error?.response?.status ?? 500,
         message:
-          err?.response?.data?.message ?? "Une erreur inconnue est survenue.",
+          error?.response?.data?.message ?? "Une erreur inconnue est survenue.",
       });
     }
   }
@@ -84,15 +84,12 @@ export const updateProduit = createAsyncThunk(
       formData.append("marque", data.marque);
       formData.append("categorie", data.categorie);
 
-      // Add new images
       data.images.forEach((image) => {
         formData.append(`images`, image);
       });
 
-      // Add kept images as JSON array
       formData.append("keepImages", JSON.stringify(data.keepImages));
 
-      // Add suppliers as JSON array
       formData.append("fournisseurs", JSON.stringify(data.fournisseurs));
 
       const response = await api.put(`/produits/${id}`, formData, {
@@ -100,13 +97,14 @@ export const updateProduit = createAsyncThunk(
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(response);
+
       return response.data;
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
       return rejectWithValue({
-        status: err?.response?.status ?? 500,
+        status: error?.response?.status ?? 500,
         message:
-          err?.response?.data?.message ?? "Une erreur inconnue est survenue.",
+          error?.response?.data?.message ?? "Une erreur inconnue est survenue.",
       });
     }
   }

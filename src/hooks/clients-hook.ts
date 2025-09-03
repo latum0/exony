@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "@/api/axios";
 import type { ClientFormValues } from "@/components/clients/add-form";
+import type { AxiosError } from "axios";
 
 interface UpdateClientPayload {
   id: number;
@@ -31,11 +32,13 @@ export const createClient = createAsyncThunk(
       }
 
       return response.data;
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+
       return rejectWithValue({
-        status: err?.response?.status ?? 500,
+        status: err.response?.status ?? 500,
         message:
-          err?.response?.data?.message ?? "Une erreur inconnue est survenue.",
+          err.response?.data?.message ?? "Une erreur inconnue est survenue.",
       });
     }
   }

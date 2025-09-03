@@ -27,6 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient, updateClient } from "@/hooks/clients-hook";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 
 export const ClientStatut = z.enum(["ACTIVE", "BLACKLISTED"]);
 
@@ -168,13 +169,15 @@ const UserFormDialog = ({ open, onClose, initialData, onSuccess }: Props) => {
       }
       onClose();
       onSuccess?.();
-    } catch (err) {
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+
       const errorMessage =
-        err?.data?.message ||
-        err?.message ||
+        err.response?.data?.message ||
+        err.message ||
         "Une erreur inconnue est survenue.";
 
-      if (err?.status === 409) {
+      if (err.response?.status === 409) {
         toast.error("Erreur de conflit", {
           description: errorMessage,
         });

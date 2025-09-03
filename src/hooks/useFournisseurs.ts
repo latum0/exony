@@ -70,7 +70,7 @@ export const useFournisseurs = (): UseFournisseursReturn => {
     setError(null);
     try {
       const response = await api.get<{ data: Fournisseur[] }>("/fournisseurs");
-      console.log(response.data.data);
+
       setFournisseurs(response.data.data);
       setLoading(false);
     } catch (error) {
@@ -163,7 +163,7 @@ export const useFournisseurs = (): UseFournisseursReturn => {
 };
 
 interface Fournisseur {
-   idFournisseur: number; 
+  idFournisseur: number;
   nom: string;
   adresse: string;
   contact: string;

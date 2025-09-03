@@ -61,7 +61,7 @@ const produitsSlice = createSlice({
     });
     builder.addCase(fetchProduit.fulfilled, (state, action) => {
       state.produit = action.payload;
-      console.log(state.produit);
+
       state.loading = false;
     });
     builder.addCase(fetchProduit.rejected, (state, action) => {
@@ -74,7 +74,7 @@ const produitsSlice = createSlice({
     });
     builder.addCase(fetchFournisseurs.fulfilled, (state, action) => {
       state.fournisseurs = action.payload.data;
-      console.log(state.fournisseurs);
+
       state.loading = false;
     });
     builder.addCase(fetchFournisseurs.rejected, (state, action) => {

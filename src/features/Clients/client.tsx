@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -28,10 +27,9 @@ export const UsersPage = () => {
   const dispatch = useAppDispatch();
   const { clients, loading } = useAppSelector((state) => state.clients);
 
-  // --- Nouveaux états pour recherche & pagination ---
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [perPage] = useState(10); // fixe, ou tu peux mettre un select pour changer
+  const [perPage] = useState(10);
 
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);

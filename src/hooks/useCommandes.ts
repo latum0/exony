@@ -131,7 +131,7 @@ export const useCommandes = (): UseCommandesReturn => {
       const response = await api.get<CommandeListResponseDto>("/commandes", {
         params,
       });
-      console.log(response.data.items);
+
       setCommandes(response.data.items);
       setMeta(response.data.meta);
       setLoading(false);

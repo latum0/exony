@@ -21,7 +21,7 @@ export const HistoriqueDetailsModal: React.FC<HistoriqueDetailsModalProps> = ({
   historique,
 }) => {
   if (!historique) return null;
-  console.log(historique);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
       year: "numeric",

@@ -36,7 +36,7 @@ export const CommandeDetailsModal: React.FC<CommandeDetailsModalProps> = ({
   commande,
 }) => {
   if (!commande) return null;
-  console.log(commande);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
       year: "numeric",

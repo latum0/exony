@@ -106,7 +106,6 @@ export function AccountModal({
   };
 
   const handleUpdate = () => {
-    console.log("Nouvelles données :", formData);
     toast.success("Profil mis à jour avec succès !");
   };
 
@@ -214,13 +213,13 @@ export function AccountModal({
                   <Badge variant="secondary">{profile?.role}</Badge>
                 </div>
               </div>
-              <div className="flex items-start gap-2">
-                <KeyRound className="w-4 h-4 text-muted-foreground mt-1" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Permissions</p>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {profile?.permissions && profile.permissions.length > 0 ? (
-                      profile.permissions.map((perm: string, idx: number) => (
+              {profile?.permissions && profile.permissions.length > 0 && (
+                <div className="flex items-start gap-2">
+                  <KeyRound className="w-4 h-4 text-muted-foreground mt-1" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Permissions</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {profile.permissions.map((perm: string, idx: number) => (
                         <span
                           key={idx}
                           className={`px-2 py-0.5 rounded-md text-xs font-medium ${
@@ -229,15 +228,11 @@ export function AccountModal({
                         >
                           {perm}
                         </span>
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        Aucune permission
-                      </p>
-                    )}
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </TabsContent>
 
             {/* Modifier le profil */}

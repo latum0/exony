@@ -1,7 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, XCircle, MailCheck } from "lucide-react";
 import useVerifyEmail from "@/hooks/useVerifyEmail";
@@ -19,18 +24,15 @@ export default function VerifyEmail() {
     }
   }, [verificationToken, verifyEmail]);
 
-  const handleResendEmail = (): void => {
-    // Fonctionnalité pour renvoyer l'email de vérification
-    console.log("Renvoyer l'email de vérification");
-  };
+  const handleResendEmail = (): void => {};
 
   const getStatusIcon = (): JSX.Element => {
     switch (status) {
-      case 'loading':
+      case "loading":
         return <Loader2 className="h-12 w-12 animate-spin text-[#F8A67E]" />;
-      case 'success':
+      case "success":
         return <CheckCircle className="h-12 w-12 text-green-500" />;
-      case 'error':
+      case "error":
         return <XCircle className="h-12 w-12 text-red-500" />;
       default:
         return <MailCheck className="h-12 w-12 text-gray-400" />;
@@ -52,46 +54,49 @@ export default function VerifyEmail() {
             Vérification d'email
           </CardTitle>
           <CardDescription className="text-center text-gray-600">
-            {isTokenPresent 
-              ? "Nous vérifions votre adresse email" 
+            {isTokenPresent
+              ? "Nous vérifions votre adresse email"
               : "Lien de vérification manquant"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex justify-center">
-            {getStatusIcon()}
-          </div>
-          
-          <div className={`text-center text-sm font-medium rounded-lg py-3 px-4 ${
-            status === 'loading' ? 'bg-blue-50 text-blue-700' :
-            status === 'success' ? 'bg-green-50 text-green-700' :
-            status === 'error' ? 'bg-red-50 text-red-700' :
-            'bg-gray-50 text-gray-700'
-          }`}>
+          <div className="flex justify-center">{getStatusIcon()}</div>
+
+          <div
+            className={`text-center text-sm font-medium rounded-lg py-3 px-4 ${
+              status === "loading"
+                ? "bg-blue-50 text-blue-700"
+                : status === "success"
+                ? "bg-green-50 text-green-700"
+                : status === "error"
+                ? "bg-red-50 text-red-700"
+                : "bg-gray-50 text-gray-700"
+            }`}
+          >
             {getStatusMessage()}
           </div>
 
-          {status === 'success' && (
-            <Button 
+          {status === "success" && (
+            <Button
               className="w-full bg-[#F8A67E] hover:bg-[#f79469] text-white font-semibold"
-              onClick={() => window.location.href = '/'}
+              onClick={() => (window.location.href = "/")}
             >
               Se connecter
             </Button>
           )}
 
-          {status === 'error' && (
+          {status === "error" && (
             <div className="space-y-3">
-              <Button 
+              <Button
                 className="w-full bg-[#F8A67E] hover:bg-[#f79469] text-white font-semibold"
                 onClick={handleResendEmail}
               >
                 Renvoyer l'email de vérification
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full"
-                onClick={() => window.location.href = '/'}
+                onClick={() => (window.location.href = "/")}
               >
                 Retour à la connexion
               </Button>
@@ -99,10 +104,10 @@ export default function VerifyEmail() {
           )}
 
           {!isTokenPresent && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
-              onClick={() => window.location.href = '/'}
+              onClick={() => (window.location.href = "/")}
             >
               Retour à la connexion
             </Button>

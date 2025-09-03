@@ -47,7 +47,6 @@ export function SiteHeader() {
     email: profile?.email || "",
   };
 
-  // Gestion des erreurs
   useEffect(() => {
     if (profileError) {
       console.error("Erreur de profil:", profileError);
@@ -55,12 +54,10 @@ export function SiteHeader() {
     }
   }, [profileError]);
 
-  // Charger les notifications initiales et surveiller les changements
   useEffect(() => {
     if (profile?.role === "ADMIN") {
       fetchNotifications();
 
-      // Écouter les changements de localStorage pour les nouvelles notifications
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === "notifications") {
           fetchNotifications();
@@ -75,7 +72,6 @@ export function SiteHeader() {
     }
   }, [profile?.role]);
 
-  // Charger les notifications quand le dropdown s'ouvre
   useEffect(() => {
     if (isNotificationsOpen && profile?.role === "ADMIN") {
       fetchNotifications();
@@ -85,7 +81,6 @@ export function SiteHeader() {
   // Calculer le nombre de notifications non lues
   useEffect(() => {
     if (notifications && notifications.length > 0) {
-      // Vérifier dans localStorage quelles notifications ont été lues
       const readNotifications = JSON.parse(
         localStorage.getItem("readNotifications") || "[]"
       );
@@ -99,40 +94,6 @@ export function SiteHeader() {
       setUnreadCount(0);
     }
   }, [notifications]);
-
-  // Fonction pour marquer une notification comme résolue avec localStorage
-  const handleMarkAsResolved = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      // Récupérer les notifications depuis localStorage
-      const storedNotifications = localStorage.getItem("notifications");
-      if (storedNotifications) {
-        const notificationsData: Notification[] =
-          JSON.parse(storedNotifications);
-
-        // Mettre à jour la notification spécifique
-        const updatedNotifications = notificationsData.map((notif) =>
-          notif.id === id ? { ...notif, resolved: true } : notif
-        );
-
-        // Sauvegarder dans localStorage
-        localStorage.setItem(
-          "notifications",
-          JSON.stringify(updatedNotifications)
-        );
-
-        // Rafraîchir les notifications affichées
-        if (isNotificationsOpen) {
-          fetchNotifications();
-        }
-
-        toast.success("Notification marquée comme résolue");
-      }
-    } catch (err) {
-      console.error("Erreur lors du marquage comme résolu:", err);
-      toast.error("Échec de l'opération");
-    }
-  };
 
   const handleDeleteNotification = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -148,11 +109,21 @@ export function SiteHeader() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "OUT_OF_STOCK":
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+        return (
+          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-red-100">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+          </div>
+        );
       case "LOW_STOCK":
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+        return (
+          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-orange-100">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+          </div>
+        );
       default:
-        return <Bell className="h-4 w-4 text-blue-500" />;
+        return (
+          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100"></div>
+        );
     }
   };
 
@@ -173,8 +144,6 @@ export function SiteHeader() {
 
     // Mettre à jour le compteur de notifications non lues
     setUnreadCount((prev) => Math.max(0, prev - 1));
-
-    console.log("Voir détails:", notification.id);
   };
 
   // Marquer toutes les notifications comme lues
@@ -248,8 +217,7 @@ export function SiteHeader() {
                   </div>
                 ) : (
                   <div className="space-y-1 p-1">
-                    {notifications.map((notification) => {
-                      // Vérifier si la notification a été lue
+                    {notifications.map((notification, index) => {
                       const readNotifications = JSON.parse(
                         localStorage.getItem("readNotifications") || "[]"
                       );
@@ -258,92 +226,71 @@ export function SiteHeader() {
                       );
 
                       return (
-                        <DropdownMenuItem
+                        <div
                           key={notification.id}
-                          className={`flex flex-col items-start p-3 rounded-md cursor-pointer hover:bg-accent ${
-                            isRead ? "opacity-70" : "bg-blue-50"
+                          className={`group relative bg-gray-50 hover:bg-[#F8A67E]/5 border-b border-gray-100 cursor-pointer transition-colors ${
+                            !isRead ? "bg-blue-50" : ""
                           }`}
                           onClick={() => handleNotificationClick(notification)}
                         >
-                          <div className="flex items-start justify-between w-full mb-2">
-                            <div className="flex items-center gap-2">
+                          <div className="p-3">
+                            <div className="flex items-start gap-3">
                               {getNotificationIcon(notification.type)}
-                              <span className="text-sm font-medium">
-                                {getNotificationLabel(notification.type)}
-                                {!isRead && (
-                                  <span className="ml-2 inline-block h-2 w-2 rounded-full bg-blue-500"></span>
-                                )}
-                              </span>
-                            </div>
-                            {notification.resolved ? (
-                              <CheckCircle className="h-4 w-4 text-green-500" />
-                            ) : (
-                              <Badge variant="outline" className="text-xs">
-                                Non résolu
-                              </Badge>
-                            )}
-                          </div>
 
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {notification.message}
-                          </p>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-sm font-medium text-gray-900">
+                                    {getNotificationLabel(notification.type)}
+                                  </span>
+                                </div>
 
-                          <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-                            <span>
-                              {new Date(
-                                notification.createdAt
-                              ).toLocaleDateString()}
-                            </span>
-                            <div className="flex gap-1">
-                              {!notification.resolved && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  onClick={(e) =>
-                                    handleMarkAsResolved(notification.id, e)
-                                  }
-                                  title="Marquer comme résolu"
-                                >
-                                  <CheckCircle className="h-3 w-3" />
-                                </Button>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={(e) =>
-                                  handleDeleteNotification(notification.id, e)
-                                }
-                                disabled={deleting.includes(notification.id)}
-                                title="Supprimer la notification"
-                              >
-                                {deleting.includes(notification.id) ? (
-                                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                ) : (
-                                  <Trash2 className="h-3 w-3" />
-                                )}
-                              </Button>
+                                <p className="text-sm text-gray-600 mb-2">
+                                  {notification.message}
+                                </p>
+
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(
+                                      notification.createdAt
+                                    ).toLocaleDateString("fr-FR", {
+                                      day: "numeric",
+                                      month: "short",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </span>
+
+                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 hover:bg-red-100 hover:text-red-600"
+                                      onClick={(e) =>
+                                        handleDeleteNotification(
+                                          notification.id,
+                                          e
+                                        )
+                                      }
+                                      disabled={deleting.includes(
+                                        notification.id
+                                      )}
+                                      title="Supprimer"
+                                    >
+                                      {deleting.includes(notification.id) ? (
+                                        <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                      ) : (
+                                        <Trash2 className="h-3 w-3" />
+                                      )}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </DropdownMenuItem>
+                        </div>
                       );
                     })}
                   </div>
-                )}
-
-                {notifications && notifications.length > 0 && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="text-xs text-center text-muted-foreground cursor-pointer"
-                      onClick={() => {
-                        console.log("Voir toutes les notifications");
-                      }}
-                    >
-                      Voir toutes les notifications
-                    </DropdownMenuItem>
-                  </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
