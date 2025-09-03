@@ -50,7 +50,7 @@ export interface CommandeResponseDto {
 }
 
 export interface CommandeListResponseDto {
-  items: CommandeResponseDto[];
+  commandes: CommandeResponseDto[];
   meta: {
     total: number;
     page: number;
@@ -131,8 +131,8 @@ export const useCommandes = (): UseCommandesReturn => {
       const response = await api.get<CommandeListResponseDto>("/commandes", {
         params,
       });
-
-      setCommandes(response.data.items);
+      console.log(response.data);
+      setCommandes(response.data.commandes);
       setMeta(response.data.meta);
       setLoading(false);
     } catch (error) {

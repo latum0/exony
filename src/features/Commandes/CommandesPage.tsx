@@ -18,7 +18,7 @@ import {
   type CreateCommandeDto,
   type UpdateCommandeDto,
 } from "@/hooks/useCommandes";
-import { useRetour, type RetourInput } from "@/hooks/useRetour"; // Import du hook pour les retours
+import { useRetour, type RetourInput } from "@/hooks/useRetour";
 import {
   Table,
   TableBody,
@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CommandeFormDialog } from "./components/CommandeFormDialog";
-import { RetourFormDialog } from "../retours/components/RetourFormDialog"; // Import du formulaire de retour
+import { RetourFormDialog } from "../retours/components/RetourFormDialog";
 import { DeleteConfirmationModal } from "./components/DeleteConfirmationModal";
 import { CommandeDetailsModal } from "./components/CommandeDetailsModal";
 import { Input } from "@/components/ui/input";
