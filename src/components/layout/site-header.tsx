@@ -59,18 +59,18 @@ export function SiteHeader() {
   useEffect(() => {
     if (profile?.role === "ADMIN") {
       fetchNotifications();
-      
+
       // Écouter les changements de localStorage pour les nouvelles notifications
       const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === 'notifications') {
+        if (e.key === "notifications") {
           fetchNotifications();
         }
       };
-      
-      window.addEventListener('storage', handleStorageChange);
-      
+
+      window.addEventListener("storage", handleStorageChange);
+
       return () => {
-        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener("storage", handleStorageChange);
       };
     }
   }, [profile?.role]);
@@ -86,12 +86,14 @@ export function SiteHeader() {
   useEffect(() => {
     if (notifications && notifications.length > 0) {
       // Vérifier dans localStorage quelles notifications ont été lues
-      const readNotifications = JSON.parse(localStorage.getItem('readNotifications') || '[]');
-      
-      const unread = notifications.filter(notif => 
-        !notif.resolved && !readNotifications.includes(notif.id)
+      const readNotifications = JSON.parse(
+        localStorage.getItem("readNotifications") || "[]"
+      );
+
+      const unread = notifications.filter(
+        (notif) => !notif.resolved && !readNotifications.includes(notif.id)
       ).length;
-      
+
       setUnreadCount(unread);
     } else {
       setUnreadCount(0);
@@ -103,23 +105,27 @@ export function SiteHeader() {
     e.stopPropagation();
     try {
       // Récupérer les notifications depuis localStorage
-      const storedNotifications = localStorage.getItem('notifications');
+      const storedNotifications = localStorage.getItem("notifications");
       if (storedNotifications) {
-        const notificationsData: Notification[] = JSON.parse(storedNotifications);
-        
+        const notificationsData: Notification[] =
+          JSON.parse(storedNotifications);
+
         // Mettre à jour la notification spécifique
-        const updatedNotifications = notificationsData.map(notif => 
+        const updatedNotifications = notificationsData.map((notif) =>
           notif.id === id ? { ...notif, resolved: true } : notif
         );
-        
+
         // Sauvegarder dans localStorage
-        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
-        
+        localStorage.setItem(
+          "notifications",
+          JSON.stringify(updatedNotifications)
+        );
+
         // Rafraîchir les notifications affichées
         if (isNotificationsOpen) {
           fetchNotifications();
         }
-        
+
         toast.success("Notification marquée comme résolue");
       }
     } catch (err) {
@@ -164,10 +170,10 @@ export function SiteHeader() {
   // Marquer une notification comme lue quand on clique dessus
   const handleNotificationClick = (notification: Notification) => {
     markNotificationAsRead(notification.id);
-    
+
     // Mettre à jour le compteur de notifications non lues
-    setUnreadCount(prev => Math.max(0, prev - 1));
-    
+    setUnreadCount((prev) => Math.max(0, prev - 1));
+
     console.log("Voir détails:", notification.id);
   };
 
@@ -225,16 +231,6 @@ export function SiteHeader() {
                         {notifications.length > 1 ? "notifs" : "notif"}
                       </Badge>
                     )}
-                    {unreadCount > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-7 text-xs"
-                        onClick={handleMarkAllAsRead}
-                      >
-                        Tout marquer comme lu
-                      </Button>
-                    )}
                   </div>
                 </div>
 
@@ -254,13 +250,19 @@ export function SiteHeader() {
                   <div className="space-y-1 p-1">
                     {notifications.map((notification) => {
                       // Vérifier si la notification a été lue
-                      const readNotifications = JSON.parse(localStorage.getItem('readNotifications') || '[]');
-                      const isRead = readNotifications.includes(notification.id);
-                      
+                      const readNotifications = JSON.parse(
+                        localStorage.getItem("readNotifications") || "[]"
+                      );
+                      const isRead = readNotifications.includes(
+                        notification.id
+                      );
+
                       return (
                         <DropdownMenuItem
                           key={notification.id}
-                          className={`flex flex-col items-start p-3 rounded-md cursor-pointer hover:bg-accent ${isRead ? 'opacity-70' : 'bg-blue-50'}`}
+                          className={`flex flex-col items-start p-3 rounded-md cursor-pointer hover:bg-accent ${
+                            isRead ? "opacity-70" : "bg-blue-50"
+                          }`}
                           onClick={() => handleNotificationClick(notification)}
                         >
                           <div className="flex items-start justify-between w-full mb-2">
@@ -298,7 +300,9 @@ export function SiteHeader() {
                                   variant="ghost"
                                   size="icon"
                                   className="h-6 w-6"
-                                  onClick={(e) => handleMarkAsResolved(notification.id, e)}
+                                  onClick={(e) =>
+                                    handleMarkAsResolved(notification.id, e)
+                                  }
                                   title="Marquer comme résolu"
                                 >
                                   <CheckCircle className="h-3 w-3" />

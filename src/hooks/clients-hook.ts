@@ -49,11 +49,20 @@ export const updateClient = createAsyncThunk(
     return response.data;
   }
 );
-export const fetchClients = createAsyncThunk("clients/fetchAll", async () => {
-  const response = await api.get("/clients");
+export const fetchClients = createAsyncThunk(
+  "clients/fetchAll",
+  async (params?: { page?: number; perPage?: number; search?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append("page", params.page.toString());
+    if (params?.perPage)
+      searchParams.append("perPage", params.perPage.toString());
+    if (params?.search) searchParams.append("search", params.search);
 
-  return response.data.data;
-});
+    const response = await api.get(`/clients?${searchParams.toString()}`);
+
+    return response.data.data;
+  }
+);
 export const deleteClient = createAsyncThunk(
   "clients/delete",
   async (id: number) => {

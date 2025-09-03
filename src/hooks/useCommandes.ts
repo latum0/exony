@@ -30,7 +30,9 @@ export interface UpdateCommandeDto {
 export interface LigneResponseDto {
   idLigne: number;
   produitId: string;
+  produit: string;
   quantite: number;
+
   prixUnitaire: string;
   commandeId: string;
 }
@@ -41,6 +43,8 @@ export interface CommandeResponseDto {
   statut: string;
   adresseLivraison: string;
   montantTotal: string;
+  client: string;
+  retour: number;
   clientId: number;
   ligne: LigneResponseDto[];
 }
@@ -77,9 +81,17 @@ interface UseCommandesReturn {
   error: string | null;
   getCommandes: (params?: GetCommandesParams) => Promise<void>;
   getCommande: (id: string) => Promise<void>;
-  createCommande: (data: CreateCommandeDto) => Promise<CommandeResponseDto | undefined>;
-  updateCommande: (id: string, data: UpdateCommandeDto) => Promise<CommandeResponseDto | undefined>;
-  updateCommandeMontant: (id: string, montantTotal: string) => Promise<CommandeResponseDto | undefined>;
+  createCommande: (
+    data: CreateCommandeDto
+  ) => Promise<CommandeResponseDto | undefined>;
+  updateCommande: (
+    id: string,
+    data: UpdateCommandeDto
+  ) => Promise<CommandeResponseDto | undefined>;
+  updateCommandeMontant: (
+    id: string,
+    montantTotal: string
+  ) => Promise<CommandeResponseDto | undefined>;
   deleteCommande: (id: string) => Promise<boolean>;
   resetCommande: () => void;
 }
@@ -87,7 +99,9 @@ interface UseCommandesReturn {
 export const useCommandes = (): UseCommandesReturn => {
   const [commandes, setCommandes] = useState<CommandeResponseDto[]>([]);
   const [commande, setCommande] = useState<CommandeResponseDto | null>(null);
-  const [meta, setMeta] = useState<CommandeListResponseDto["meta"] | null>(null);
+  const [meta, setMeta] = useState<CommandeListResponseDto["meta"] | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,7 +128,10 @@ export const useCommandes = (): UseCommandesReturn => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get<CommandeListResponseDto>("/commandes", { params });
+      const response = await api.get<CommandeListResponseDto>("/commandes", {
+        params,
+      });
+      console.log(response.data.items);
       setCommandes(response.data.items);
       setMeta(response.data.meta);
       setLoading(false);
@@ -123,69 +140,79 @@ export const useCommandes = (): UseCommandesReturn => {
     }
   };
 
- const getCommande = async (id: string) => {
-  setLoading(true);
-  setError(null);
-  try {
-    const response = await api.get<{ data: CommandeResponseDto }>(`/commandes/${id}`);
-    setCommande(response.data.data); // Accéder à response.data.data
-    setLoading(false);
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-const createCommande = async (data: CreateCommandeDto) => {
-  setLoading(true);
-  setError(null);
-  try {
-    const response = await api.post<{ data: CommandeResponseDto }>("/commandes", data);
-    setCommandes((prev) => [...prev, response.data.data]); // Accéder à response.data.data
-    setLoading(false);
-    return response.data.data; // Retourner response.data.data
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
- const updateCommande = async (id: string, data: UpdateCommandeDto) => {
-  setLoading(true);
-  setError(null);
-  try {
-    const response = await api.patch<{ data: CommandeResponseDto }>(`/commandes/${id}`, data);
-    setCommandes((prev) =>
-      prev.map((c) => (c.idCommande === id ? response.data.data : c)) // Accéder à response.data.data
-    );
-    if (commande?.idCommande === id) {
+  const getCommande = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get<{ data: CommandeResponseDto }>(
+        `/commandes/${id}`
+      );
       setCommande(response.data.data); // Accéder à response.data.data
+      setLoading(false);
+    } catch (error) {
+      handleApiError(error);
     }
-    setLoading(false);
-    return response.data.data; // Retourner response.data.data
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
+  };
+
+  const createCommande = async (data: CreateCommandeDto) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.post<{ data: CommandeResponseDto }>(
+        "/commandes",
+        data
+      );
+      setCommandes((prev) => [...prev, response.data.data]); // Accéder à response.data.data
+      setLoading(false);
+      return response.data.data; // Retourner response.data.data
+    } catch (error) {
+      return handleApiError(error);
+    }
+  };
+
+  const updateCommande = async (id: string, data: UpdateCommandeDto) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.patch<{ data: CommandeResponseDto }>(
+        `/commandes/${id}`,
+        data
+      );
+      setCommandes(
+        (prev) =>
+          prev.map((c) => (c.idCommande === id ? response.data.data : c)) // Accéder à response.data.data
+      );
+      if (commande?.idCommande === id) {
+        setCommande(response.data.data); // Accéder à response.data.data
+      }
+      setLoading(false);
+      return response.data.data; // Retourner response.data.data
+    } catch (error) {
+      return handleApiError(error);
+    }
+  };
 
   const updateCommandeMontant = async (id: string, montantTotal: string) => {
-  setLoading(true);
-  setError(null);
-  try {
-    const response = await api.patch<{ data: CommandeResponseDto }>(
-      `/commandes/${id}/montant`,
-      { montantTotal }
-    );
-    setCommandes((prev) =>
-      prev.map((c) => (c.idCommande === id ? response.data.data : c)) // Accéder à response.data.data
-    );
-    if (commande?.idCommande === id) {
-      setCommande(response.data.data); // Accéder à response.data.data
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.patch<{ data: CommandeResponseDto }>(
+        `/commandes/${id}/montant`,
+        { montantTotal }
+      );
+      setCommandes(
+        (prev) =>
+          prev.map((c) => (c.idCommande === id ? response.data.data : c)) // Accéder à response.data.data
+      );
+      if (commande?.idCommande === id) {
+        setCommande(response.data.data); // Accéder à response.data.data
+      }
+      setLoading(false);
+      return response.data.data; // Retourner response.data.data
+    } catch (error) {
+      return handleApiError(error);
     }
-    setLoading(false);
-    return response.data.data; // Retourner response.data.data
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
+  };
 
   const deleteCommande = async (id: string) => {
     setLoading(true);

@@ -10,9 +10,15 @@ import {
   Undo2, // Ajout de l'icône de retour
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
-import { useCommandes } from "@/hooks/useCommandes";
-import { useRetour } from "@/hooks/useRetour"; // Import du hook pour les retours
+import {
+  useCommandes,
+  type CommandeResponseDto,
+  type CreateCommandeDto,
+  type UpdateCommandeDto,
+} from "@/hooks/useCommandes";
+import { useRetour, type RetourInput } from "@/hooks/useRetour"; // Import du hook pour les retours
 import {
   Table,
   TableBody,
@@ -38,7 +44,7 @@ export const CommandesPage = () => {
   const {
     commandes = [],
     commande,
-    meta,
+
     loading,
     error,
     getCommandes,
@@ -53,41 +59,54 @@ export const CommandesPage = () => {
   const { createRetour } = useRetour();
 
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [selectedCommande, setSelectedCommande] = useState<CommandeResponseDto | null>(null);
+  const [selectedCommande, setSelectedCommande] =
+    useState<CommandeResponseDto | null>(null);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [commandeToDelete, setCommandeToDelete] = useState<CommandeResponseDto | null>(null);
+  const [commandeToDelete, setCommandeToDelete] =
+    useState<CommandeResponseDto | null>(null);
   const [isViewDialogOpen, setViewDialogOpen] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 5,
+    pageSize: 10,
   });
 
   // États pour gérer le retour
   const [isRetourDialogOpen, setRetourDialogOpen] = useState(false);
-  const [commandeForRetour, setCommandeForRetour] = useState<CommandeResponseDto | null>(null);
+  const [commandeForRetour, setCommandeForRetour] =
+    useState<CommandeResponseDto | null>(null);
 
   const [filters, setFilters] = useState({
     statut: "",
-    clientId: "",
+
     minTotal: "",
     maxTotal: "",
   });
 
   const filteredCommandes = Array.isArray(commandes)
     ? commandes.filter((c) => {
-        const matchesGlobal = 
+        const matchesGlobal =
           c.idCommande?.toLowerCase().includes(globalFilter.toLowerCase()) ||
-          c.adresseLivraison?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+          c.adresseLivraison
+            ?.toLowerCase()
+            .includes(globalFilter.toLowerCase()) ||
           c.montantTotal?.includes(globalFilter) ||
           c.clientId?.toString().includes(globalFilter);
 
-        const matchesStatut = filters.statut ? c.statut === filters.statut : true;
-        const matchesClient = filters.clientId ? c.clientId.toString() === filters.clientId : true;
-        const matchesMinTotal = filters.minTotal ? parseFloat(c.montantTotal) >= parseFloat(filters.minTotal) : true;
-        const matchesMaxTotal = filters.maxTotal ? parseFloat(c.montantTotal) <= parseFloat(filters.maxTotal) : true;
+        const matchesStatut = filters.statut
+          ? c.statut === filters.statut
+          : true;
 
-        return matchesGlobal && matchesStatut && matchesClient && matchesMinTotal && matchesMaxTotal;
+        const matchesMinTotal = filters.minTotal
+          ? parseFloat(c.montantTotal) >= parseFloat(filters.minTotal)
+          : true;
+        const matchesMaxTotal = filters.maxTotal
+          ? parseFloat(c.montantTotal) <= parseFloat(filters.maxTotal)
+          : true;
+
+        return (
+          matchesGlobal && matchesStatut && matchesMinTotal && matchesMaxTotal
+        );
       })
     : [];
 
@@ -103,7 +122,7 @@ export const CommandesPage = () => {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         statut: filters.statut || undefined,
-        clientId: filters.clientId ? parseInt(filters.clientId) : undefined,
+
         minTotal: filters.minTotal ? parseFloat(filters.minTotal) : undefined,
         maxTotal: filters.maxTotal ? parseFloat(filters.maxTotal) : undefined,
       });
@@ -184,12 +203,12 @@ export const CommandesPage = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -226,86 +245,105 @@ export const CommandesPage = () => {
       )}
 
       <div className="w-full">
-        <div className="flex items-center py-4 gap-2 flex-wrap">
-          <Input
-            placeholder="Rechercher par ID, adresse, montant, client..."
-            value={globalFilter}
-            onChange={(e) => {
-              setGlobalFilter(e.target.value);
-              setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-            }}
-            className="max-w-sm border-gray-300 rounded-md shadow-sm bg-neutral-50"
-          />
-          
-          <Select
-            value={filters.statut}
-            onValueChange={(value) => {
-              setFilters(prev => ({ ...prev, statut: value }));
-              setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Statut" />
-            </SelectTrigger>
-            <SelectContent>
-              {statutOptions.map(option => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="bg-gray-50 p-4 rounded-lg mb-4 border">
+          <h3 className="font-semibold mb-3 text-gray-700">Filtres avancés</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Recherche globale */}
+            <div className="relative">
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Recherche
+              </label>
+              <Search className="absolute left-3 top-9 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="ID, adresse, montant, client..."
+                value={globalFilter}
+                onChange={(e) => {
+                  setGlobalFilter(e.target.value);
+                  setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+                }}
+                className="pl-10 border-gray-300 bg-white/50"
+              />
+            </div>
 
-          <Input
-            placeholder="Client ID"
-            value={filters.clientId}
-            onChange={(e) => {
-              setFilters(prev => ({ ...prev, clientId: e.target.value }));
-              setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-            }}
-            className="w-[120px] border-gray-300 rounded-md shadow-sm bg-neutral-50"
-          />
+            {/* Statut */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Statut
+              </label>
+              <Select
+                value={filters.statut}
+                onValueChange={(value) => {
+                  setFilters((prev) => ({ ...prev, statut: value }));
+                  setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+                }}
+              >
+                <SelectTrigger className="w-full border-gray-300 bg-white/50">
+                  <SelectValue placeholder="Sélectionner un statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statutOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <Input
-            placeholder="Montant min"
-            value={filters.minTotal}
-            onChange={(e) => {
-              setFilters(prev => ({ ...prev, minTotal: e.target.value }));
-              setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-            }}
-            className="w-[120px] border-gray-300 rounded-md shadow-sm bg-neutral-50"
-          />
+            {/* Montant min */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Montant min
+              </label>
+              <Input
+                placeholder="Min"
+                value={filters.minTotal}
+                onChange={(e) => {
+                  setFilters((prev) => ({ ...prev, minTotal: e.target.value }));
+                  setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+                }}
+                className="border-gray-300 bg-white/50"
+              />
+            </div>
 
-          <Input
-            placeholder="Montant max"
-            value={filters.maxTotal}
-            onChange={(e) => {
-              setFilters(prev => ({ ...prev, maxTotal: e.target.value }));
-              setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-            }}
-            className="w-[120px] border-gray-300 rounded-md shadow-sm bg-neutral-50"
-          />
+            {/* Montant max */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Montant max
+              </label>
+              <Input
+                placeholder="Max"
+                value={filters.maxTotal}
+                onChange={(e) => {
+                  setFilters((prev) => ({ ...prev, maxTotal: e.target.value }));
+                  setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+                }}
+                className="border-gray-300 bg-white/50"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="rounded-lg border shadow-sm overflow-hidden">
+        <div className="rounded-lg border  overflow-hidden">
           <div className="overflow-x-auto">
             <Table className="min-w-full">
               <TableHeader className="bg-gray-100">
                 <TableRow>
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
-                    ID Commande
+                    Réference
                   </TableHead>
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
                     Date
                   </TableHead>
+
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
-                    Statut
-                  </TableHead>
-                  <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
-                    Client ID
+                    Num Client
                   </TableHead>
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
                     Montant Total
+                  </TableHead>
+                  <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
+                    Statut
                   </TableHead>
                   <TableHead className="text-gray-700 font-semibold py-3 px-4 whitespace-nowrap">
                     Actions
@@ -329,7 +367,7 @@ export const CommandesPage = () => {
                       colSpan={6}
                       className="h-24 text-center text-gray-500"
                     >
-                      {globalFilter || filters.statut || filters.clientId
+                      {globalFilter || filters.statut
                         ? "Aucun résultat trouvé"
                         : "Aucune commande enregistrée"}
                     </TableCell>
@@ -350,22 +388,30 @@ export const CommandesPage = () => {
                       <TableCell className="py-3 px-4 whitespace-nowrap">
                         {formatDate(c.dateCommande)}
                       </TableCell>
+
                       <TableCell className="py-3 px-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          c.statut === "EN_ATTENTE" ? "bg-yellow-100 text-yellow-800" :
-                          c.statut === "EN_COURS" ? "bg-blue-100 text-blue-800" :
-                          c.statut === "LIVREE" ? "bg-green-100 text-green-800" :
-                          "bg-red-100 text-red-800"
-                        }`}>
-                          {statutOptions.find(s => s.value === c.statut)?.label || c.statut}
-                        </span>
-                      </TableCell>
-                      <TableCell className="py-3 px-4 whitespace-nowrap">
-                        {c.clientId}
+                        {c.client}
                       </TableCell>
                       <TableCell className="py-3 px-4 whitespace-nowrap font-medium">
                         {parseFloat(c.montantTotal).toFixed(2)} DA
                       </TableCell>
+                      <TableCell className="py-3 px-4 whitespace-nowrap">
+                        <span
+                          className={`px-2.5 py-1.5 rounded-md border text-xs font-semibold tracking-wide ${
+                            c.statut === "EN_ATTENTE"
+                              ? "bg-orange-100 text-orange-600 border-orange-400"
+                              : c.statut === "EN_COURS"
+                              ? "bg-blue-100 text-blue-600 border-blue-400"
+                              : c.statut === "LIVREE"
+                              ? "bg-green-100 text-green-600 border-green-400"
+                              : "bg-red-100 text-red-600 border-red-400"
+                          }`}
+                        >
+                          {statutOptions.find((s) => s.value === c.statut)
+                            ?.label || c.statut}
+                        </span>
+                      </TableCell>
+
                       <TableCell className="py-3 px-4 whitespace-nowrap">
                         <div className="flex gap-2">
                           <Button
@@ -384,14 +430,16 @@ export const CommandesPage = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-[#F8A67E] border-[#F8A67E] hover:bg-[#F8A67E]/10"
-                            onClick={() => handleAddRetour(c)}
-                          >
-                            <Undo2 className="h-4 w-4" />
-                          </Button>
+                          {!c.retour && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-purple-500 border "
+                              onClick={() => handleAddRetour(c)}
+                            >
+                              <Undo2 className="h-4 w-4 text-purple-500 " />
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
@@ -486,9 +534,7 @@ export const CommandesPage = () => {
         }}
         initialData={selectedCommande}
         onSubmit={
-          selectedCommande
-            ? handleUpdateCommande
-            : handleCreateCommande
+          selectedCommande ? handleUpdateCommande : handleCreateCommande
         }
       />
 
@@ -499,12 +545,16 @@ export const CommandesPage = () => {
           setRetourDialogOpen(false);
           setCommandeForRetour(null);
         }}
-        initialData={commandeForRetour ? {
-          commandeId: commandeForRetour.idCommande,
-          dateRetour: new Date().toISOString().slice(0, 16),
-          statutRetour: "PENDING",
-          raisonRetour: "",
-        } as any : null}
+        initialData={
+          commandeForRetour
+            ? ({
+                commandeId: commandeForRetour.idCommande,
+                dateRetour: new Date().toISOString().slice(0, 16),
+                statutRetour: "PENDING",
+                raisonRetour: "",
+              } as any)
+            : null
+        }
         onSubmit={handleCreateRetour}
       />
 
@@ -512,7 +562,11 @@ export const CommandesPage = () => {
         open={isDeleteDialogOpen}
         onConfirm={confirmDelete}
         onCancel={() => setDeleteDialogOpen(false)}
-        itemName={commandeToDelete?.idCommande ? `la commande ${commandeToDelete.idCommande.slice(0, 8)}...` : "cette commande"}
+        itemName={
+          commandeToDelete?.idCommande
+            ? `la commande ${commandeToDelete.idCommande.slice(0, 8)}...`
+            : "cette commande"
+        }
       />
 
       <CommandeDetailsModal

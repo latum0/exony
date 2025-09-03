@@ -1,6 +1,11 @@
 // src/pages/retours/components/RetourFormDialog.tsx
 import React, { useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Retour, RetourInput } from "@/hooks/useRetour";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,11 +28,13 @@ const retourSchema = z.object({
   statutRetour: z.enum(["PENDING", "COMPLETED", "CANCELLED"], {
     required_error: "Le statut est requis",
   }),
-  raisonRetour: z.string()
+  raisonRetour: z
+    .string()
     .min(1, "La raison du retour est requise")
     .min(10, "La raison doit contenir au moins 10 caractères")
     .max(500, "La raison ne peut pas dépasser 500 caractères"),
-  commandeId: z.string()
+  commandeId: z
+    .string()
     .min(1, "L'ID de commande est requis")
     .regex(/^[a-zA-Z0-9-]+$/, "L'ID de commande doit être alphanumérique"),
 });
@@ -69,13 +76,16 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
   useEffect(() => {
     if (initialData) {
       // Pour l'édition, formater la date pour l'input datetime-local
-      const dateRetour = initialData.dateRetour 
+      const dateRetour = initialData.dateRetour
         ? new Date(initialData.dateRetour).toISOString().slice(0, 16)
         : new Date().toISOString().slice(0, 16);
-        
+
       reset({
         dateRetour,
-        statutRetour: initialData.statutRetour as "PENDING" | "COMPLETED" | "CANCELLED",
+        statutRetour: initialData.statutRetour as
+          | "PENDING"
+          | "COMPLETED"
+          | "CANCELLED",
         raisonRetour: initialData.raisonRetour || "",
         commandeId: initialData.commandeId || "",
       });
@@ -96,19 +106,19 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
         ...data,
         dateRetour: new Date(data.dateRetour).toISOString(),
       };
-      
+
       await onSubmit(submitData);
-      
+
       toast.success(
         initialData ? "Retour modifié avec succès" : "Retour créé avec succès",
         {
-          description: initialData 
+          description: initialData
             ? "Les modifications ont été enregistrées."
             : "Le retour a été créé avec succès.",
           duration: 3000,
         }
       );
-      
+
       onClose();
     } catch (error) {
       console.error("Erreur lors de la soumission du formulaire:", error);
@@ -129,20 +139,26 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        onClose();
-      }
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Modifier le retour" : "Créer un retour"}
+            {initialData ? "Gérer le retour" : "Créer un retour"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+        <form
+          onSubmit={handleSubmit(onFormSubmit)}
+          className="space-y-4 w-full"
+        >
+          <div className="flex justify-between gap-4 w-full">
+            <div className="space-y-2 w-full">
               <Label htmlFor="dateRetour">Date de retour *</Label>
               <Input
                 id="dateRetour"
@@ -151,17 +167,23 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
                 className={errors.dateRetour ? "border-red-500" : ""}
               />
               {errors.dateRetour && (
-                <p className="text-red-500 text-sm">{errors.dateRetour.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.dateRetour.message}
+                </p>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-full">
               <Label htmlFor="statutRetour">Statut *</Label>
               <Select
                 value={formData.statutRetour}
-                onValueChange={(value) => handleSelectChange("statutRetour", value)}
+                onValueChange={(value) =>
+                  handleSelectChange("statutRetour", value)
+                }
               >
-                <SelectTrigger className={errors.statutRetour ? "border-red-500" : ""}>
+                <SelectTrigger
+                  className={errors.statutRetour ? "border-red-500" : ""}
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -171,23 +193,11 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
                 </SelectContent>
               </Select>
               {errors.statutRetour && (
-                <p className="text-red-500 text-sm">{errors.statutRetour.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.statutRetour.message}
+                </p>
               )}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="commandeId">ID de commande *</Label>
-            <Input
-              id="commandeId"
-              {...register("commandeId")}
-              placeholder="ID de la commande"
-              className={errors.commandeId ? "border-red-500" : ""}
-              readOnly={!!initialData} // Lecture seule en mode édition
-            />
-            {errors.commandeId && (
-              <p className="text-red-500 text-sm">{errors.commandeId.message}</p>
-            )}
           </div>
 
           <div className="space-y-2">
@@ -202,7 +212,9 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
               placeholder="Décrivez la raison du retour..."
             />
             {errors.raisonRetour && (
-              <p className="text-red-500 text-sm">{errors.raisonRetour.message}</p>
+              <p className="text-red-500 text-sm">
+                {errors.raisonRetour.message}
+              </p>
             )}
             <p className="text-sm text-gray-500">
               {formData.raisonRetour.length}/500 caractères
@@ -210,22 +222,24 @@ export const RetourFormDialog: React.FC<RetourFormDialogProps> = ({
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
             >
               Annuler
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               style={{ background: "#F8A67E" }}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Traitement..." : (
-                initialData ? "Enregistrer les modifications" : "Créer le retour"
-              )}
+              {isSubmitting
+                ? "Traitement..."
+                : initialData
+                ? "Enregistrer"
+                : "Créer le retour"}
             </Button>
           </div>
         </form>

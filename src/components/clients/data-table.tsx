@@ -23,7 +23,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 import {
   Select,
@@ -80,14 +79,14 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 gap-2">
+      {/* <div className="flex items-center py-4 gap-2">
         <Input
           placeholder="Rechercher ..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm  border-gray-300 rounded-md  bg-neutral-50 "
         />
-      </div>
+      </div> */}
       <div className="rounded-lg border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <Table className="min-w-full">

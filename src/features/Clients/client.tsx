@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { Button } from "@/components/ui/button";
-import { CogIcon, Loader2, PlusCircleIcon } from "lucide-react";
+import { CogIcon, Loader2, PlusCircleIcon, SearchIcon } from "lucide-react";
 import UserFormDialog from "@/components/clients/add-form";
 import {
   addToBlacklist,
@@ -20,14 +21,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export const UsersPage = () => {
   const dispatch = useAppDispatch();
   const { clients, loading } = useAppSelector((state) => state.clients);
 
-  const [isAddDialogOpen, setAddDialogOpen] = useState(false);
+  // --- Nouveaux états pour recherche & pagination ---
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage] = useState(10); // fixe, ou tu peux mettre un select pour changer
 
+  const [isAddDialogOpen, setAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
@@ -40,8 +46,8 @@ export const UsersPage = () => {
   >(null);
 
   useEffect(() => {
-    dispatch(fetchClients());
-  }, [dispatch]);
+    dispatch(fetchClients({ page, perPage, search }));
+  }, [dispatch, page, perPage, search]);
 
   const handleEditClient = (client: Client) => {
     setEditingClient(client);
@@ -63,18 +69,10 @@ export const UsersPage = () => {
 
     try {
       await dispatch(deleteClient(deletingClientId)).unwrap();
-
-      toast.success("Client supprimé avec succès !", {
-        description: "Le client a été retiré de la liste.",
-      });
-
-      dispatch(fetchClients());
+      toast.success("Client supprimé avec succès !");
+      dispatch(fetchClients({ page, perPage, search }));
     } catch (error) {
-      console.error("Error deleting client:", error);
-      toast.error("Erreur lors de la suppression du client", {
-        description:
-          "Veuillez réessayer. Si le problème persiste, contactez le support.",
-      });
+      toast.error("Erreur lors de la suppression du client");
     } finally {
       setIsDeleteDialogOpen(false);
       setDeletingClientId(null);
@@ -86,18 +84,10 @@ export const UsersPage = () => {
 
     try {
       await dispatch(addToBlacklist(blacklistingClientId)).unwrap();
-
-      toast.success("Client ajouté à la blacklist !", {
-        description: "Le statut du client a été mis à jour.",
-      });
-
-      dispatch(fetchClients());
+      toast.success("Client ajouté à la blacklist !");
+      dispatch(fetchClients({ page, perPage, search }));
     } catch (error) {
-      console.error("Error blacklisting client:", error);
-      toast.error("Erreur lors de l'ajout à la blacklist", {
-        description:
-          "Veuillez réessayer. Si le problème persiste, contactez le support.",
-      });
+      toast.error("Erreur lors de l'ajout à la blacklist");
     } finally {
       setIsBlacklistDialogOpen(false);
       setBlacklistingClientId(null);
@@ -105,7 +95,7 @@ export const UsersPage = () => {
   };
 
   const handleFormSuccess = () => {
-    dispatch(fetchClients());
+    dispatch(fetchClients({ page, perPage, search }));
   };
 
   const columns = getClientColumns({
@@ -123,17 +113,33 @@ export const UsersPage = () => {
         <Button
           onClick={() => setAddDialogOpen(true)}
           style={{ background: "#F8A67E", borderRadius: "8px" }}
-          className=" "
         >
           <PlusCircleIcon className="w-4 h-4 mr-0.5" />
           Ajouter un client
         </Button>
-        <UserFormDialog
-          open={isAddDialogOpen}
-          onClose={() => setAddDialogOpen(false)}
-          onSuccess={handleFormSuccess}
-        />
       </div>
+
+      <div className="relative w-full max-w-sm mb-7">
+        <Input
+          type="text"
+          placeholder="Rechercher un client..."
+          className="pl-10 bg-neutral-50 h-10"
+        />
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      </div>
+
+      {/* <div className="flex items-center gap-2 mb-4">
+        <Input
+          placeholder="Rechercher un client..."
+          value={search}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
+        />
+        <SearchIcon className="text-gray-500" />
+      </div> */}
+
       {loading ? (
         <div className="flex justify-center items-center py-8">
           <Loader2 className="size-12 animate-spin text-[#F8A67E]" />
@@ -142,25 +148,29 @@ export const UsersPage = () => {
         <DataTable columns={columns} data={clients} />
       )}
 
-      {/* Edit Client Dialog (now using UserFormDialog) */}
+      {/* Dialogs */}
+      <UserFormDialog
+        open={isAddDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onSuccess={handleFormSuccess}
+      />
+
       <UserFormDialog
         open={isEditDialogOpen}
         onClose={() => {
           setIsEditDialogOpen(false);
-          setEditingClient(null); // Clear editing client when dialog closes
+          setEditingClient(null);
         }}
         initialData={editingClient}
         onSuccess={handleFormSuccess}
       />
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmer la suppression</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce client ? Cette action est
-              irréversible.
+              Êtes-vous sûr de vouloir supprimer ce client ?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -177,7 +187,6 @@ export const UsersPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Blacklist Confirmation Dialog */}
       <Dialog
         open={isBlacklistDialogOpen}
         onOpenChange={setIsBlacklistDialogOpen}
@@ -186,8 +195,7 @@ export const UsersPage = () => {
           <DialogHeader>
             <DialogTitle>Confirmer l'ajout à la blacklist</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir ajouter ce client à la blacklist ? Son
-              statut passera à "BLACKLISTED".
+              Êtes-vous sûr de vouloir ajouter ce client à la blacklist ?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
