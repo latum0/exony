@@ -15,21 +15,21 @@ const fournisseurSchema = z.object({
     .min(1, "Le nom est requis")
     .max(100, "Le nom ne doit pas dépasser 100 caractères")
     .regex(/^[a-zA-ZÀ-ÿ0-9\s\-&.,']+$/, "Le nom contient des caractères invalides"),
-  
+
   adresse: z.string()
     .min(1, "L'adresse est requise")
     .max(200, "L'adresse ne doit pas dépasser 200 caractères"),
-  
+
   contact: z.string()
     .min(1, "Le contact est requis")
     .max(100, "Le contact ne doit pas dépasser 100 caractères")
     .regex(/^[a-zA-ZÀ-ÿ\s\-]+$/, "Le contact ne doit contenir que des lettres et espaces"),
-  
+
   telephone: z.string()
     .min(1, "Le téléphone est requis")
-    .regex(/^(\+213[5-7][0-9]{8}|0[5-7][0-9]{8})$/, 
+    .regex(/^(\+213[5-7][0-9]{8}|0[5-7][0-9]{8})$/,
       "Le numéro doit commencer par 0 ou +213 et être suivi de 9 chiffres valides (05, 06, ou 07)"),
-  
+
   email: z.string()
     .min(1, "L'email est requis")
     .email("Format d'email invalide")
@@ -86,12 +86,12 @@ export const FournisseurFormDialog: React.FC<FournisseurFormDialogProps> = ({
   const handleFormSubmit = async (data: FormValues) => {
     try {
       await onSubmit(data);
-      
+
       // Succès
       toast.success(initialData ? "Fournisseur modifié avec succès !" : "Fournisseur créé avec succès !", {
         description: `Le fournisseur ${data.nom} a été ${initialData ? "mis à jour" : "ajouté"}.`,
       });
-      
+
       onClose();
       reset();
     } catch (err: any) {
@@ -100,7 +100,7 @@ export const FournisseurFormDialog: React.FC<FournisseurFormDialogProps> = ({
         err?.data?.message ||
         err?.message ||
         "Une erreur inconnue est survenue.";
-      
+
       // Gestion spécifique des erreurs de conflit
       if (err?.status === 409) {
         toast.error("Erreur de conflit", {
@@ -127,7 +127,7 @@ export const FournisseurFormDialog: React.FC<FournisseurFormDialogProps> = ({
             {initialData ? "Modifier le fournisseur" : "Ajouter un fournisseur"}
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
@@ -201,8 +201,8 @@ export const FournisseurFormDialog: React.FC<FournisseurFormDialogProps> = ({
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               type="button"
               onClick={() => {
                 onClose();
@@ -213,8 +213,8 @@ export const FournisseurFormDialog: React.FC<FournisseurFormDialogProps> = ({
             >
               Annuler
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               style={{ background: "#F8A67E" }}
               className="px-4 py-2 text-white hover:bg-orange-600"
               disabled={isSubmitting}

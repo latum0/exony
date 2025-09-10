@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircleIcon, CogIcon, PencilIcon, TrashIcon, Eye, Undo2 } from "lucide-react";
-import { useRetour } from "@/hooks/useRetour";
+import { useRetour, type Retour, type RetourInput, type RetourUpdateInput } from "@/hooks/useRetour";
 import {
   Table,
   TableBody,
@@ -51,13 +51,13 @@ export const RetoursPage = () => {
     pageSize: 5,
   });
 
-  const filteredRetours = Array.isArray(retours) 
+  const filteredRetours = Array.isArray(retours)
     ? retours.filter(r =>
-        (r.raisonRetour?.toLowerCase().includes(globalFilter.toLowerCase()) ||
-         r.commandeId?.toLowerCase().includes(globalFilter.toLowerCase()) ||
-         r.statutRetour?.toLowerCase().includes(globalFilter.toLowerCase())) &&
-        (statusFilter === "all" || r.statutRetour === statusFilter)
-      )
+      (r.raisonRetour?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+        r.commandeId?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+        r.statutRetour?.toLowerCase().includes(globalFilter.toLowerCase())) &&
+      (statusFilter === "all" || r.statutRetour === statusFilter)
+    )
     : [];
 
   const pageCount = Math.ceil(filteredRetours.length / pagination.pageSize);
@@ -84,22 +84,22 @@ export const RetoursPage = () => {
     handleGetRetours();
   };
 
- const handleUpdateRetour = async (data: RetourInput) => {
-  if (selectedRetour) {
-    // Créez un objet avec seulement les champs modifiés
-    const updateData: RetourUpdateInput = {
-      dateRetour: data.dateRetour,
-      statutRetour: data.statutRetour,
-      raisonRetour: data.raisonRetour,
-      commandeId: data.commandeId
-    };
-    
-    await updateRetour(selectedRetour.idRetour, updateData);
-    setDialogOpen(false);
-    setSelectedRetour(null);
-    handleGetRetours();
-  }
-};
+  const handleUpdateRetour = async (data: RetourInput) => {
+    if (selectedRetour) {
+      // Créez un objet avec seulement les champs modifiés
+      const updateData: RetourUpdateInput = {
+        dateRetour: data.dateRetour,
+        statutRetour: data.statutRetour,
+        raisonRetour: data.raisonRetour,
+        commandeId: data.commandeId
+      };
+
+      await updateRetour(selectedRetour.idRetour, updateData);
+      setDialogOpen(false);
+      setSelectedRetour(null);
+      handleGetRetours();
+    }
+  };
 
   const handleViewDetails = async (idRetour: number) => {
     try {
@@ -110,10 +110,10 @@ export const RetoursPage = () => {
     }
   };
 
- const handleDeleteClick = (retour: Retour) => {
-  setRetourToDelete(retour);
-  setDeleteDialogOpen(true);
-};
+  const handleDeleteClick = (retour: Retour) => {
+    setRetourToDelete(retour);
+    setDeleteDialogOpen(true);
+  };
 
   const confirmDelete = async () => {
     if (retourToDelete) {
@@ -152,7 +152,7 @@ export const RetoursPage = () => {
         <h2 className="text-2xl font-bold gap-x-2 flex items-center text-[#F8A67E]">
           <Undo2 size={28} /> Gestion des retours
         </h2>
-       
+
       </div>
 
       {error && (
@@ -190,7 +190,7 @@ export const RetoursPage = () => {
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="rounded-lg border shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <Table className="min-w-full">
@@ -213,7 +213,7 @@ export const RetoursPage = () => {
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              
+
               <TableBody>
                 {loading ? (
                   <TableRow>
@@ -243,11 +243,10 @@ export const RetoursPage = () => {
                         {formatDate(r.dateRetour)}
                       </TableCell>
                       <TableCell className="py-3 px-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          r.statutRetour === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                          r.statutRetour === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${r.statutRetour === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                            r.statutRetour === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                          }`}>
                           {r.statutRetour}
                         </span>
                       </TableCell>
@@ -275,14 +274,14 @@ export const RetoursPage = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                        <Button
-  variant="outline"
-  size="sm"
-  className="text-red-500 border-red-500 hover:bg-red-500/10"
-  onClick={() => handleDeleteClick(r)} // Utilisez handleDeleteClick au lieu de handleDeleteClick
->
-  <TrashIcon className="h-4 w-4" />
-</Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-500 border-red-500 hover:bg-red-500/10"
+                            onClick={() => handleDeleteClick(r)} // Utilisez handleDeleteClick au lieu de handleDeleteClick
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

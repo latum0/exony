@@ -123,7 +123,7 @@ const UserFormDialog = ({ open, onClose, initialData, onSuccess }: Props) => {
       onSuccess?.();
     } catch (err: any) {
       console.error("Erreur lors de la soumission:", err);
-      
+
       // Extraction du message d'erreur
       const errorMessage =
         err?.payload?.message || // Pour les erreurs rejectWithValue de Redux
@@ -175,11 +175,10 @@ const UserFormDialog = ({ open, onClose, initialData, onSuccess }: Props) => {
                         onClick={() => togglePermission(perm)}
                         className={`cursor-pointer px-3 py-2 rounded-full text-sm flex items-center gap-1
                 border transition duration-200
-                ${
-                  checked
-                    ? "bg-orange-100 border-orange-500 text-orange-700"
-                    : "bg-[#F3F5F6] border-gray-300 text-gray-700 hover:bg-gray-200"
-                }
+                ${checked
+                            ? "bg-orange-100 border-orange-500 text-orange-700"
+                            : "bg-[#F3F5F6] border-gray-300 text-gray-700 hover:bg-gray-200"
+                          }
               `}
                       >
                         {checked && (
@@ -279,11 +278,10 @@ const UserFormDialog = ({ open, onClose, initialData, onSuccess }: Props) => {
                         onClick={() => togglePermission(perm)}
                         className={`cursor-pointer px-3 py-2 rounded-full text-sm flex items-center gap-1
                 border transition duration-200
-                ${
-                  checked
-                    ? "bg-orange-100 border-orange-500 text-orange-700"
-                    : "bg-[#F3F5F6] border-gray-300 text-gray-700 hover:bg-gray-200"
-                }
+                ${checked
+                            ? "bg-orange-100 border-orange-500 text-orange-700"
+                            : "bg-[#F3F5F6] border-gray-300 text-gray-700 hover:bg-gray-200"
+                          }
               `}
                       >
                         {checked && (
@@ -304,16 +302,16 @@ const UserFormDialog = ({ open, onClose, initialData, onSuccess }: Props) => {
           )}
 
           <div className="flex justify-end space-x-2">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={onClose}
               disabled={isSubmitting}
             >
               Annuler
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               style={{ background: "#F8A67E" }}
               disabled={isSubmitting}
             >

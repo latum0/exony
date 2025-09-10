@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Card,
@@ -24,7 +24,7 @@ export default function VerifyEmail() {
     }
   }, [verificationToken, verifyEmail]);
 
-  const handleResendEmail = (): void => {};
+  const handleResendEmail = (): void => { };
 
   const getStatusIcon = (): JSX.Element => {
     switch (status) {
@@ -63,15 +63,14 @@ export default function VerifyEmail() {
           <div className="flex justify-center">{getStatusIcon()}</div>
 
           <div
-            className={`text-center text-sm font-medium rounded-lg py-3 px-4 ${
-              status === "loading"
+            className={`text-center text-sm font-medium rounded-lg py-3 px-4 ${status === "loading"
                 ? "bg-blue-50 text-blue-700"
                 : status === "success"
-                ? "bg-green-50 text-green-700"
-                : status === "error"
-                ? "bg-red-50 text-red-700"
-                : "bg-gray-50 text-gray-700"
-            }`}
+                  ? "bg-green-50 text-green-700"
+                  : status === "error"
+                    ? "bg-red-50 text-red-700"
+                    : "bg-gray-50 text-gray-700"
+              }`}
           >
             {getStatusMessage()}
           </div>

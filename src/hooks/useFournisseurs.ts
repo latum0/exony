@@ -1,8 +1,9 @@
 import { useState } from "react";
 import api from "@/api/axios";
 
-interface Fournisseur {
+export interface Fournisseur {
   id: string;
+  idFournisseur: number; // Keep both for backward compatibility
   nom: string;
   adresse: string;
   contact: string;
@@ -12,7 +13,7 @@ interface Fournisseur {
   updatedAt?: string;
 }
 
-interface FournisseurInput {
+export interface FournisseurInput {
   nom: string;
   adresse: string;
   contact: string;
@@ -20,9 +21,9 @@ interface FournisseurInput {
   email: string;
 }
 
-interface FournisseurUpdateInput extends Partial<FournisseurInput> {}
+export interface FournisseurUpdateInput extends Partial<FournisseurInput> { }
 
-interface UseFournisseursReturn {
+export interface UseFournisseursReturn {
   fournisseurs: Fournisseur[];
   fournisseur: Fournisseur | null;
   loading: boolean;
@@ -115,9 +116,9 @@ export const useFournisseurs = (): UseFournisseursReturn => {
         data
       );
       setFournisseurs((prev) =>
-        prev.map((f) => (f.id === id ? response.data : f))
+        prev.map((f) => (f.id === id || f.idFournisseur.toString() === id ? response.data : f))
       );
-      if (fournisseur?.id === id) {
+      if (fournisseur?.id === id || fournisseur?.idFournisseur.toString() === id) {
         setFournisseur(response.data);
       }
       setLoading(false);
@@ -127,13 +128,17 @@ export const useFournisseurs = (): UseFournisseursReturn => {
     }
   };
 
-  const deleteFournisseur = async (id: number) => {
+  const deleteFournisseur = async (id: string) => {
     setLoading(true);
     setError(null);
     try {
       await api.delete(`/fournisseurs/${id}`);
-      setFournisseurs((prev) => prev.filter((f) => f.idFournisseur !== id));
-      if (fournisseur?.idFournisseur === id) {
+      setFournisseurs((prev) =>
+        prev.filter((f) =>
+          f.id !== id && f.idFournisseur.toString() !== id
+        )
+      );
+      if (fournisseur?.id === id || fournisseur?.idFournisseur.toString() === id) {
         setFournisseur(null);
       }
       setLoading(false);
@@ -161,25 +166,3 @@ export const useFournisseurs = (): UseFournisseursReturn => {
     resetFournisseur,
   };
 };
-
-interface Fournisseur {
-  idFournisseur: number;
-  nom: string;
-  adresse: string;
-  contact: string;
-  telephone: string;
-  email: string;
-
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-interface FournisseurInput {
-  nom: string;
-  adresse: string;
-  contact: string;
-  telephone: string;
-  email: string;
-}
-
-export interface FournisseurUpdateInput extends Partial<FournisseurInput> {}
