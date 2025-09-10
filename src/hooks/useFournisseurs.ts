@@ -2,8 +2,7 @@ import { useState } from "react";
 import api from "@/api/axios";
 
 export interface Fournisseur {
-  id: string;
-  idFournisseur: number; // Keep both for backward compatibility
+  id: number;
   nom: string;
   adresse: string;
   contact: string;
@@ -29,15 +28,15 @@ export interface UseFournisseursReturn {
   loading: boolean;
   error: string | null;
   getFournisseurs: () => Promise<void>;
-  getFournisseur: (id: string) => Promise<void>;
+  getFournisseur: (id: number) => Promise<void>;
   createFournisseur: (
     data: FournisseurInput
   ) => Promise<Fournisseur | undefined>;
   updateFournisseur: (
-    id: string,
+    id: number,
     data: FournisseurUpdateInput
   ) => Promise<Fournisseur | undefined>;
-  deleteFournisseur: (id: string) => Promise<boolean>;
+  deleteFournisseur: (id: number) => Promise<boolean>;
   resetFournisseur: () => void;
 }
 
@@ -79,7 +78,7 @@ export const useFournisseurs = (): UseFournisseursReturn => {
     }
   };
 
-  const getFournisseur = async (id: string) => {
+  const getFournisseur = async (id: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -105,7 +104,7 @@ export const useFournisseurs = (): UseFournisseursReturn => {
   };
 
   const updateFournisseur = async (
-    id: string,
+    id: number,
     data: FournisseurUpdateInput
   ) => {
     setLoading(true);
@@ -116,9 +115,9 @@ export const useFournisseurs = (): UseFournisseursReturn => {
         data
       );
       setFournisseurs((prev) =>
-        prev.map((f) => (f.id === id || f.idFournisseur.toString() === id ? response.data : f))
+        prev.map((f) => (f.id === id ? response.data : f))
       );
-      if (fournisseur?.id === id || fournisseur?.idFournisseur.toString() === id) {
+      if (fournisseur?.id === id) {
         setFournisseur(response.data);
       }
       setLoading(false);
@@ -128,17 +127,13 @@ export const useFournisseurs = (): UseFournisseursReturn => {
     }
   };
 
-  const deleteFournisseur = async (id: string) => {
+  const deleteFournisseur = async (id: number) => {
     setLoading(true);
     setError(null);
     try {
       await api.delete(`/fournisseurs/${id}`);
-      setFournisseurs((prev) =>
-        prev.filter((f) =>
-          f.id !== id && f.idFournisseur.toString() !== id
-        )
-      );
-      if (fournisseur?.id === id || fournisseur?.idFournisseur.toString() === id) {
+      setFournisseurs((prev) => prev.filter((f) => f.idFournisseur !== id));
+      if (fournisseur?.idFournisseur === id) {
         setFournisseur(null);
       }
       setLoading(false);
@@ -166,3 +161,25 @@ export const useFournisseurs = (): UseFournisseursReturn => {
     resetFournisseur,
   };
 };
+
+export interface Fournisseur {
+  idFournisseur: number;
+  nom: string;
+  adresse: string;
+  contact: string;
+  telephone: string;
+  email: string;
+
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface FournisseurInput {
+  nom: string;
+  adresse: string;
+  contact: string;
+  telephone: string;
+  email: string;
+}
+
+export interface FournisseurUpdateInput extends Partial<FournisseurInput> { }
